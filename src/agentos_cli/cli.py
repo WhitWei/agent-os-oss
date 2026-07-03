@@ -193,6 +193,113 @@ def start_mcp(port: int, host: str, config: Optional[str]) -> None:
         click.echo("\n⏹️  MCP server stopped.")
 
 
+# ── validate ──
+
+
+@main.command()
+@click.option("--domain", required=True, help="Ontology domain (e.g. it-asset-mgmt).")
+@click.option("--file", "data_file", required=True, type=click.Path(exists=True), help="Path to RDF data file (Turtle).")
+@click.option("--config", default=None, help="Path to config YAML.")
+def validate(domain: str, data_file: str, config: Optional[str]) -> None:
+    """Validate RDF data and get a nonce."""
+    try:
+        from agentos_kernel.config import ConfigLoader
+        from governance.schema_provider import SchemaProvider
+        from governance.write_gate import WriteGate
+    except ImportError as exc:
+        click.echo(f"❌ Failed to import governance components: {exc}", err=True)
+        sys.exit(1)
+
+    config_path = config or os.environ.get("AGENT_OS_CONFIG", "config.yaml")
+    loader = ConfigLoader(config_path)
+    app_config = loader.load()
+
+    schema_provider = SchemaProvider(
+        owl_dir=app_config.ontology.owl_dir,
+        shacl_dir=app_config.ontology.shacl_dir,
+        domains=app_config.ontology.domains,
+    )
+    write_gate = WriteGate(
+        schema_provider=schema_provider,
+        neo4j_client=None,
+        nonce_secret=app_config.mcp.validation.nonce_secret,
+        nonce_ttl_seconds=app_config.mcp.validation.nonce_ttl_seconds,
+    )
+    
+    with open(data_file, "r") as f:
+        rdf_data = f.read().strip()
+
+    report, nonce = write_gate.verify_shacl_compliance(domain, rdf_data)
+    if report.is_valid:
+        click.echo(f"✅ Validation passed. Nonce: {nonce}")
+    else:
+        click.echo(f"❌ Validation failed: {report.conforms}")
+        sys.exit(1)
+
+
+# ── write ──
+
+
+@main.command()
+@click.option("--domain", required=True, help="Ontology domain (e.g. it-asset-mgmt).")
+@click.option("--nonce", required=True, help="Validation nonce.")
+@click.option("--file", "data_file", required=True, type=click.Path(exists=True), help="Path to RDF data file (Turtle).")
+@click.option("--config", default=None, help="Path to config YAML.")
+def write(domain: str, nonce: str, data_file: str, config: Optional[str]) -> None:
+    """Execute a governed write to the database."""
+    try:
+        from agentos_kernel.config import ConfigLoader
+        from governance.schema_provider import SchemaProvider
+        from governance.write_gate import WriteGate
+        from governance.neo4j_client import Neo4jClient
+        from policies.autonomy_policy import load_policy
+        from agentos_kernel.kernel import AgentOSKernel, ChannelMessage
+    except ImportError as exc:
+        click.echo(f"❌ Failed to import governance components: {exc}", err=True)
+        sys.exit(1)
+
+    config_path = config or os.environ.get("AGENT_OS_CONFIG", "config.yaml")
+    loader = ConfigLoader(config_path)
+    app_config = loader.load()
+
+    async def _do_write():
+        neo4j_client = Neo4jClient(app_config.neo4j)
+        try:
+            await neo4j_client.health_check()
+            schema_provider = SchemaProvider(
+                owl_dir=app_config.ontology.owl_dir,
+                shacl_dir=app_config.ontology.shacl_dir,
+                domains=app_config.ontology.domains,
+            )
+            write_gate = WriteGate(
+                schema_provider=schema_provider,
+                neo4j_client=neo4j_client,
+                nonce_secret=app_config.mcp.validation.nonce_secret,
+                nonce_ttl_seconds=app_config.mcp.validation.nonce_ttl_seconds,
+            )
+            policy = load_policy(app_config.autonomy.policy_file)
+            kernel = AgentOSKernel(config=app_config, write_gate=write_gate, autonomy_policy=policy)
+            
+            with open(data_file, "r") as f:
+                rdf_data = f.read().strip()
+                
+            msg = ChannelMessage(
+                text=f"execute_governed_write {domain} {nonce}\n{rdf_data}",
+                sender_id="cli-user",
+                sender_name="CLI",
+                channel="cli"
+            )
+            response = await kernel.wake_up(msg)
+            if response.metadata.get("status") == "error" or response.error:
+                click.echo(f"❌ Write failed: {response.text}", err=True)
+                sys.exit(1)
+            click.echo(f"✅ {response.text}")
+        finally:
+            await neo4j_client.close()
+
+    asyncio.run(_do_write())
+
+
 # ── loop ──
 
 
@@ -270,3 +377,7 @@ def _find_loop_engine() -> Optional[str]:
         if candidate.is_file() and os.access(str(candidate), os.X_OK):
             return str(candidate)
     return None
+
+
+if __name__ == "__main__":
+    main()

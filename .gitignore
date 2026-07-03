@@ -51,3 +51,6 @@ logs/
 # Testcontainers / Ryuk residues
 .ryuk/
 testcontainers.properties
+
+# State
+.loop_state.json

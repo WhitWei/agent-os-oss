@@ -49,7 +49,7 @@ def e2e_neo4j_container(docker_available):
 
     from testcontainers.neo4j import Neo4jContainer
 
-    container = Neo4jContainer(image="neo4j:5.25-community", password="e2e-test-12345")
+    container = Neo4jContainer(image="neo4j:5.26-community", password="e2e-test-12345")
     container.start()
     try:
         yield container

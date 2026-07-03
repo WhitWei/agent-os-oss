@@ -24,6 +24,39 @@ from policies.autonomy_policy import load_policy
 from security.billing_fuse import BillingFuse, BillingFuseConfig
 from agentos_kernel.kernel import AgentOSKernel
 
+@pytest.fixture(scope="session")
+def neo4j_container(docker_available):
+    if not docker_available:
+        pytest.skip("Docker daemon 不可用 —— 无法拉起真实 Neo4j 容器做 L2 落库验证")
+
+    from testcontainers.neo4j import Neo4jContainer
+
+    container = Neo4jContainer(image="neo4j:5.26-community", password="l2test12345")
+    container.start()
+    try:
+        yield container
+    finally:
+        container.stop()
+
+
+@pytest.fixture
+async def neo4j_client(neo4j_container):
+    from governance.neo4j_client import Neo4jClient
+    from agentos_kernel.config import Neo4jConfig
+    config = Neo4jConfig(
+        uri=neo4j_container.get_connection_url(),
+        user=neo4j_container.username,
+        password=neo4j_container.password,
+        database="neo4j",
+    )
+    client = Neo4jClient(config)
+    try:
+        healthy = await client.health_check()
+        assert healthy, "testcontainers 起的 Neo4j 容器未通过 health_check —— 环境问题,不是被测代码问题"
+        yield client
+    finally:
+        await client.close()
+
 
 def _docker_available() -> bool:
     """真实探测 Docker daemon 是否可用（不是猜测，是实际连一次）。"""
@@ -106,7 +139,7 @@ def wired_kernel(app_config, real_write_gate, autonomy_policy) -> AgentOSKernel:
 def wired_kernel_small_budget(app_config, real_write_gate, autonomy_policy) -> AgentOSKernel:
     """同上，但注入一个真实的、小额度的 BillingFuse，让计费熔断能在 2~3 次调用内
     确定性触发，避免依赖默认 $0.50 预算下"第一条消息就必定触发"这种脆弱断言。"""
-    small_budget_fuse = BillingFuse(BillingFuseConfig(budget_cap_usd=10.0))
+    small_budget_fuse = BillingFuse(BillingFuseConfig(budget_cap_usd=0.01))
     return AgentOSKernel(
         config=app_config,
         write_gate=real_write_gate,

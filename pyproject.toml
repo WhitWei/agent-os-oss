@@ -52,6 +52,10 @@ agentos = "agentos_cli.cli:main"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+filterwarnings = [
+    "ignore:.*@wait_container_is_ready.*:DeprecationWarning:testcontainers.neo4j.*",
+    "ignore:.*wait_for_logs.*:DeprecationWarning:testcontainers.neo4j.*",
+]
 pythonpath = ["src", "tests"]
 markers = [
     "integration: L2 集成/接线测试，需要 Docker(testcontainers)，比单元测试慢",

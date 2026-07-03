@@ -260,10 +260,10 @@ class TestKernelBillingHooks:
         from security.billing_fuse import BillingFuse, BillingFuseConfig
         kernel._circuit_breaker = CircuitBreaker()
         
-        # Single verify costs $8.40. Budget cap=10.0.
-        # Call 1: $8.40 (under $10.0 -> OK)
-        # Call 2: $16.80 (exceeds $10.0 -> TRIPS)
-        kernel._billing_fuse = BillingFuse(BillingFuseConfig(budget_cap_usd=10.0))
+        # Single verify costs ~$0.0084. Budget cap=0.01.
+        # Call 1: ~$0.0084 (under $0.01 -> OK)
+        # Call 2: ~$0.0168 (exceeds $0.01 -> TRIPS)
+        kernel._billing_fuse = BillingFuse(BillingFuseConfig(budget_cap_usd=0.01))
 
         msg = ChannelMessage(
             text="verify valid data to consume tokens",
@@ -272,11 +272,11 @@ class TestKernelBillingHooks:
             channel="cli",
         )
 
-        # Call 1 (costs $8.40, fits within $10.0 budget)
+        # Call 1 (costs ~$0.0084, fits within $0.01 budget)
         r1 = await kernel.wake_up(msg)
         assert r1.metadata["status"] == "ok"
 
-        # Call 2 (cumulative cost $16.80, exceeds $10.0 budget, must trip)
+        # Call 2 (cumulative cost ~$0.0168, exceeds $0.01 budget, must trip)
         r2 = await kernel.wake_up(msg)
         assert r2.metadata["status"] == "exhausted"
         assert "Billing limit reached" in r2.text

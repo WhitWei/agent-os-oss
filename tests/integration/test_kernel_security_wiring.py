@@ -66,9 +66,9 @@ class TestBillingFuseWiredIntoKernel:
         """连续发送触发计费统计的真实消息(不是直接调用 record_usage),
         累计花费超过预算后,kernel 必须通过 wake_up() 拒绝后续调用。
 
-        budget_cap_usd=10.0,每次 governance 关键词命中消耗 $8.4
+        budget_cap_usd=0.01,每次 governance 关键词命中消耗 $0.0084
         (800 prompt + 400 completion tokens @ claude-sonnet-4 定价,精确可复现)。
-        第 1 次:8.4 <= 10 → 放行。第 2 次:16.8 > 10 → 熔断跳闸。
+        第 1 次:0.0084 <= 0.01 → 放行。第 2 次:0.0168 > 0.01 → 熔断跳闸。
         """
         msg = ChannelMessage(
             text="please validate this asset record",

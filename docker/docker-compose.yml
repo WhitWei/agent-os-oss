@@ -1,6 +1,6 @@
 services:
   neo4j:
-    image: neo4j:5.25-community
+    image: neo4j:5.26-community
     container_name: agent-os-neo4j
     ports:
       - "7474:7474"  # HTTP

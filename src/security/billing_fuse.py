@@ -28,7 +28,7 @@ from agentos_kernel.exceptions import BillingFuseTrippedError
 
 logger = logging.getLogger(__name__)
 
-# ── Default Pricing Table (USD per 1K tokens) ──
+# ── Default Pricing Table (USD per 1M tokens) ──
 
 DEFAULT_PRICING = {
     # Claude models
@@ -205,6 +205,6 @@ class BillingFuse:
                 "completion": self.config.default_completion_rate,
             },
         )
-        prompt_cost = (usage.prompt_tokens / 1000.0) * rates["prompt"]
-        completion_cost = (usage.completion_tokens / 1000.0) * rates["completion"]
+        prompt_cost = (usage.prompt_tokens / 1_000_000.0) * rates["prompt"]
+        completion_cost = (usage.completion_tokens / 1_000_000.0) * rates["completion"]
         return prompt_cost + completion_cost

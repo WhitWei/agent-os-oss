@@ -37,6 +37,69 @@ LLM Agents are powerful, but giving them raw access to shell commands, filesyste
 
 ---
 
+## 🔌 MCP Server (Claude Desktop Integration)
+
+Agent OS can run as a **Model Context Protocol (MCP)** server, providing a "Governance Gateway" for Claude Desktop and other MCP-compatible clients.
+
+### 3-Line Setup for Claude Desktop
+
+Edit your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "agent-os": {
+      "command": "agentos",
+      "args": ["start-mcp", "--port", "8100"]
+    }
+  }
+}
+```
+
+That's it! Your Claude Desktop agent is now strictly governed by Agent OS's semantic firewall and write gates.
+
+---
+
+## 🚀 Quick Start (Local Development)
+
+### 1. Spin up Safe Storage (Neo4j & Langfuse)
+We provide a pre-configured community Docker stack:
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
+
+### 2. Install Dependencies
+```bash
+pip install -e ".[dev]"
+```
+
+### 3. Run the E2E Integration Verification
+Test the entire safety cycle (firewall, billing fuse, and database write checks) in one go:
+```bash
+export RYUK_DISABLED=true
+python3 -m pytest tests/ -v
+```
+
+### 4. Execute the Demo Script
+Observe the runtime in action:
+```bash
+agentos loop run --task "Run demo"
+# or python3 scripts/run_demo.py
+```
+
+---
+
+## 🛡️ Three-Tier Testing Constitution
+
+We enforce a strict quality gate in our development workflow:
+1.  **L1 Unit Tests**: No external dependencies. Run logic check.
+2.  **L2 Integration Tests**: Uses `testcontainers` to launch actual Neo4j instances to check actual transactional batch writes.
+3.  **L3 E2E Tests**: Simulates full user flow (e.g. employee onboarding SOP card approvals).
+
+Please read our [Contributing Guide](CONTRIBUTING.md) for more details.
+
+---
+
 ## 🏗️ Architecture & Control Flow
 
 Agent OS integrates safety hooks directly into the kernel dispatch cycle:
@@ -65,45 +128,6 @@ graph TD
     
     Billing -->|Output| Response([Safe Action Output])
 ```
-
----
-
-## 🚀 Quick Start (Local Development)
-
-### 1. Spin up Safe Storage (Neo4j & Langfuse)
-We provide a pre-configured community Docker stack:
-```bash
-docker compose -f docker/docker-compose.yml up -d
-```
-
-### 2. Install Dependencies
-```bash
-pip install -e ".[dev]"
-```
-
-### 3. Run the E2E Integration Verification
-Test the entire safety cycle (firewall, billing fuse, and database write checks) in one go:
-```bash
-export RYUK_DISABLED=true
-python3 -m pytest tests/ -v
-```
-
-### 4. Execute the Demo Script
-Observe the runtime in action:
-```bash
-python3 scripts/run_demo.py
-```
-
----
-
-## 🛡️ Three-Tier Testing Constitution
-
-We enforce a strict quality gate in our development workflow:
-1.  **L1 Unit Tests**: No external dependencies. Run logic check.
-2.  **L2 Integration Tests**: Uses `testcontainers` to launch actual Neo4j instances to check actual transactional batch writes.
-3.  **L3 E2E Tests**: Simulates full user flow (e.g. employee onboarding SOP card approvals).
-
-Please read our [Contributing Guide](CONTRIBUTING.md) for more details.
 
 ---
 

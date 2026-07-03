@@ -74,18 +74,19 @@ class Neo4jClient:
             logger.debug("Write executed: %d records", len(records))
             return records
 
-    async def execute_write_batch(self, statements: list[str]) -> list[dict[str, Any]]:
+    async def execute_write_batch(self, statements: list[str]) -> int:
         """Execute multiple write Cypher queries within a single transaction."""
-        all_records = []
+        total_written = 0
         async with self.transaction() as tx:
             for cypher in statements:
                 if cypher.strip():
                     result = await tx.run(cypher, {})
-                    records = await result.data()
-                    all_records.extend(records)
+                    summary = await result.consume()
+                    total_written += summary.counters.nodes_created
+                    total_written += summary.counters.relationships_created
             await tx.commit()
-            logger.debug("Write batch executed: %d queries, %d records", len(statements), len(all_records))
-            return all_records
+            logger.debug("Write batch executed: %d queries, %d records created", len(statements), total_written)
+            return total_written
 
     async def execute_read(self, cypher: str, params: dict[str, Any] | None = None) -> list[dict[str, Any]]:
         """Execute a read-only Cypher query and return results."""

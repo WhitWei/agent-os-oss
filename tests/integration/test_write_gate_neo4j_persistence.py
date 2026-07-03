@@ -23,36 +23,6 @@ from agentos_kernel.exceptions import SHACLValidationError
 pytestmark = pytest.mark.integration
 
 
-@pytest.fixture(scope="module")
-def neo4j_container(docker_available):
-    if not docker_available:
-        pytest.skip("Docker daemon 不可用 —— 无法拉起真实 Neo4j 容器做 L2 落库验证")
-
-    from testcontainers.neo4j import Neo4jContainer
-
-    container = Neo4jContainer(image="neo4j:5.25-community", password="l2test12345")
-    container.start()
-    try:
-        yield container
-    finally:
-        container.stop()
-
-
-@pytest.fixture
-async def neo4j_client(neo4j_container) -> Neo4jClient:
-    config = Neo4jConfig(
-        uri=neo4j_container.get_connection_url(),
-        user=neo4j_container.username,
-        password=neo4j_container.password,
-        database="neo4j",
-    )
-    client = Neo4jClient(config)
-    try:
-        healthy = await client.health_check()
-        assert healthy, "testcontainers 起的 Neo4j 容器未通过 health_check —— 环境问题,不是被测代码问题"
-        yield client
-    finally:
-        await client.close()
 
 
 @pytest.fixture

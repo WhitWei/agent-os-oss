@@ -38,7 +38,7 @@ def fuse() -> BillingFuse:
 @pytest.fixture
 def tiny_fuse() -> BillingFuse:
     """Billing fuse with very small budget for quick trip tests."""
-    return BillingFuse(BillingFuseConfig(budget_cap_usd=0.01))
+    return BillingFuse(BillingFuseConfig(budget_cap_usd=0.0001))
 
 
 class TestInitialState:
@@ -126,8 +126,8 @@ class TestBudgetTrip:
             tiny_fuse.record_usage(
                 TokenUsage(prompt_tokens=100, completion_tokens=10, model="claude-sonnet-4")
             )
-        assert exc.value.budget_usd == 0.01
-        assert exc.value.spent_usd > 0.01
+        assert exc.value.budget_usd == 0.0001
+        assert exc.value.spent_usd > 0.0001
         assert tiny_fuse.is_tripped is True
 
     def test_post_trip_calls_rejected(self, tiny_fuse):
@@ -146,7 +146,7 @@ class TestBudgetTrip:
 
     def test_multiple_small_charges_accumulate_to_trip(self):
         """Many small charges should eventually trip when cumulative > budget."""
-        fuse = BillingFuse(BillingFuseConfig(budget_cap_usd=0.05))
+        fuse = BillingFuse(BillingFuseConfig(budget_cap_usd=0.0005))
         tripped = False
         for i in range(20):
             try:
@@ -188,8 +188,8 @@ class TestPricingTable:
         cost = fuse.record_usage(
             TokenUsage(prompt_tokens=1000, completion_tokens=0, model="unknown-model")
         )
-        # Default: $3.00/1K prompt
-        assert cost == pytest.approx(3.00)
+        # Default: $3.00/1M prompt
+        assert cost == pytest.approx(0.003)
 
 
 class TestRevokeCallback:
@@ -203,7 +203,7 @@ class TestRevokeCallback:
             was_called.append(True)
 
         fuse = BillingFuse(
-            BillingFuseConfig(budget_cap_usd=0.001, revoke_on_trip=True),
+            BillingFuseConfig(budget_cap_usd=0.0001, revoke_on_trip=True),
             revoke_callback=on_revoke,
         )
         try:
@@ -222,7 +222,7 @@ class TestRevokeCallback:
             was_called.append(True)
 
         fuse = BillingFuse(
-            BillingFuseConfig(budget_cap_usd=0.001, revoke_on_trip=False),
+            BillingFuseConfig(budget_cap_usd=0.0001, revoke_on_trip=False),
             revoke_callback=on_revoke,
         )
         try:

@@ -251,6 +251,24 @@ class AgentOSKernel:
                 "with your RDF data in Turtle format."
             )
 
+        if text.startswith("execute_governed_write "):
+            # Format: execute_governed_write <domain> <nonce>\n<data>
+            lines = text.split("\n", 1)
+            parts = lines[0].split()
+            if len(parts) >= 3:
+                domain = parts[1]
+                nonce = parts[2]
+                rdf_data = lines[1] if len(lines) > 1 else ""
+                if self._write_gate:
+                    result = await self._write_gate.execute_governed_write(
+                        domain_name=domain,
+                        data_rdf=rdf_data,
+                        validation_nonce=nonce
+                    )
+                    return f"Write successful: {result}"
+                return "Governance gateway not configured."
+            return "Invalid execute_governed_write format. Expected: execute_governed_write <domain> <nonce>"
+
         if "write" in text_lower or "execute" in text_lower:
             return (
                 "To execute a governed write, first call "
@@ -308,6 +326,9 @@ class AgentOSKernel:
             return False
 
         first_token = text.split()[0] if text.split() else ""
+        if first_token == "execute_governed_write":
+            return False
+
         rest = text[len(first_token):].strip()
 
         # Path-based commands: starts with / or ./

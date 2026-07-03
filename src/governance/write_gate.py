@@ -231,14 +231,14 @@ class WriteGate:
         # 4. Execute the write (async — called from async context)
         if self._neo4j_client is not None:
             logger.info("Executing write batch to Neo4j database")
-            records = await self._neo4j_client.execute_write_batch(cypher_statements)
+            records_written = await self._neo4j_client.execute_write_batch(cypher_statements)
             return {
                 "status": "success",
                 "domain": domain_name,
                 "transaction_id": hashlib.sha256(
                     f"{domain_name}:{time.time()}".encode()
                 ).hexdigest()[:16],
-                "records_written": len(records),
+                "records_written": records_written,
             }
 
         return {
