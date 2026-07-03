@@ -1,0 +1,118 @@
+name: L2/L3 集成与业务场景测试 (Rule 10)
+
+# 触发条件：
+# 1. PR 修改了 src/ 或 tests/integration|e2e/ 时，自动执行
+# 2. push 到 main/develop 分支时同步执行
+#
+# 与 ontology-ci.yml 的分工：
+#   ontology-ci.yml  —— 本体/SHACL 内容回归（数据契约层面）
+#   integration-ci.yml (本文件) —— L2 代码接线回归 + L3 真实业务场景回归
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/integration/**"
+      - "tests/e2e/**"
+      - "scripts/check_wiring.py"
+      - "config.yaml"
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "src/**"
+
+jobs:
+  wiring-audit:
+    name: 孤儿能力接线检测 (Rule 10.4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run wiring audit
+        run: python3 scripts/check_wiring.py
+
+  l2-integration-tests:
+    name: L2 集成测试 (真实 kernel 接线 + 真实 Neo4j 落库)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # GitHub Actions ubuntu-latest runner 自带 Docker daemon，
+    # testcontainers 会直接复用它拉起真实 Neo4j 容器，无需额外 services 配置。
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uv pip install --system -e ".[dev]"
+
+      - name: Run L2 integration tests
+        run: |
+          python3 -m pytest tests/integration -v \
+            --ignore=tests/integration/test_no_orphaned_capabilities.py
+
+      # 孤儿能力检测已经在 wiring-audit job 里跑过一次静态脚本版本；
+      # 这里额外跑一次 pytest 包装版本，确保它作为常驻回归项被计入测试报告。
+      - name: Run orphaned-capability regression test
+        run: |
+          python3 -m pytest tests/integration/test_no_orphaned_capabilities.py -v
+
+  l3-business-scenarios:
+    name: L3 真实业务场景测试 (Rule 10.1 第三层 — 真实 Neo4j + 真实 SOP 引擎)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uv pip install --system -e ".[dev]"
+
+      - name: Run L3 business scenario tests
+        run: |
+          python3 -m pytest tests/e2e -v
+
+  unit-tests:
+    name: L1 单元测试
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uv pip install --system -e ".[dev]"
+
+      - name: Run unit tests (excluding tests/integration and tests/e2e)
+        run: |
+          python3 -m pytest tests -v --ignore=tests/integration --ignore=tests/e2e

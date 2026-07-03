@@ -1,0 +1,75 @@
+# SOP 定义：新员工入职 IT 设备分配
+# ================================================
+# sop_id:  it-onboarding-v1
+# 版本:    1.0
+# 触发场景：HR/IT 管理员发送入职指令时，Agent 拉起本流程
+# 端到端 UAT 场景对应 WO-A3.4
+# ================================================
+
+sop_id: "it-onboarding-v1"
+name: "新员工入职 IT 设备分配"
+version: "1.0"
+description: >
+  当新员工入职时，Agent 自动执行 IT 资产分配：
+  1. 校验员工信息是否符合 SHACL 规范；
+  2. 校验待分配资产是否符合规范；
+  3. 若资产敏感等级为 HIGH 或 CRITICAL，触发人工审批；
+  4. 批准后执行资产分配写入，并发送入职通知。
+
+metadata:
+  domain: "it-asset-mgmt"
+  owner: "IT部门"
+  sla_minutes: 30
+
+steps:
+  # 步骤 1: 校验员工信息
+  - id: validate_employee
+    type: validate
+    description: "校验新员工信息是否符合 SHACL 约束"
+    domain: "it-asset-mgmt"
+    data_ref: "employee_ttl"
+
+  # 步骤 2: 校验资产数据
+  - id: validate_asset
+    type: validate
+    description: "校验待分配硬件资产是否符合 SHACL 约束"
+    domain: "it-asset-mgmt"
+    data_ref: "asset_ttl"
+
+  # 步骤 3: 敏感设备人工审批（Human-In-The-Loop）
+  # 条件：资产的 sensitivity_level 变量为 HIGH 或 CRITICAL 时触发
+  # NOTE: condition 使用 simpleeval 语法，变量来自 ctx.data。
+  # 必须用列表字面量 [a, b]，不能用元组字面量 (a, b) ——
+  # simpleeval.simple_eval() 不支持元组字面量，用了会导致每次求值都抛异常，
+  # 被 _step_human_approval 的 except 分支吞掉并默认 should_trigger=True，
+  # 结果是"低敏感度设备免审批"这条规则永远不会生效。
+  - id: approve_sensitive_asset
+    type: human_approval
+    description: "HIGH/CRITICAL 敏感资产分配需主管审批"
+    condition: "sensitivity_level in ['HIGH', 'CRITICAL']"
+    card_title: "🔐 敏感设备分配 — 需要您的审批"
+    card_message: |
+      **Agent OS** 准备执行以下操作，请确认：
+
+      👤 **新员工**: {employee_name} (`{employee_id}`)
+      💻 **设备**: {asset_model} (`{asset_id}`)
+      🔴 **敏感等级**: `{sensitivity_level}`
+
+      请仔细核对后点击批准或驳回。
+    timeout_seconds: 3600
+    extra:
+      chat_id: ""  # 留空则由调用方填充
+
+  # 步骤 4: 执行资产分配写入（需要 SHACL nonce）
+  - id: execute_assignment
+    type: action
+    description: "执行受治理的资产分配写入（Neo4j）"
+    action_type: "governed_write"
+    domain: "it-asset-mgmt"
+    data_ref: "assignment_ttl"
+
+  # 步骤 5: 发送入职完成通知
+  - id: notify_completion
+    type: notify
+    description: "通知员工和 IT 管理员设备已就绪"
+    notify_message: "✅ 新员工 {employee_name} 的设备 {asset_model} 已成功分配，入职流程完成！"

@@ -1,0 +1,76 @@
+name: Ontology-as-Code SHACL 回归测试
+
+# 触发条件：
+# 1. PR 修改了 OWL/SHACL 文件时，自动执行回归
+# 2. push 到 main/develop 分支时同步执行
+on:
+  pull_request:
+    paths:
+      - "docker/ontology/**"
+      - "scripts/check_ontology.py"
+      - "tests/golden_dataset.py"
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "docker/ontology/**"
+
+jobs:
+  shacl-regression:
+    name: SHACL 本体回归测试
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          # NOTE: 使用 uv 加速安装（与本项目 pyproject.toml 一致）
+          pip install uv
+          uv pip install --system \
+            pyshacl \
+            rdflib \
+            pydantic \
+            pyyaml
+
+      - name: Run SHACL regression suite
+        id: shacl_test
+        run: |
+          python scripts/check_ontology.py \
+            --ci \
+            --ontology-dir docker/ontology \
+            --domain it-asset-mgmt \
+            --verbose
+
+      # 若上一步失败，在 PR 评论中附上详情（需要 pull-requests: write 权限）
+      - name: Report failure comment
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ❌ SHACL 本体回归测试失败
+
+            本次 PR 修改的 OWL/SHACL 文件破坏了一项或多项现有业务约束。
+            请查看 [Actions 日志](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) 了解详细信息。
+
+            **修复要求**：
+            1. 不得删除或削弱现有 SHACL Shape 中的 \`sh:minCount\` 约束。
+            2. 如需修改约束，请同步更新 \`tests/golden_dataset.py\` 中的黄金数据集，并说明理由。
+            `
+            })
+
+    # NOTE: 触发 CI 拦截验证命令
+    # 修改破坏性本体时，此 job 将返回 exit(1)，阻止 PR 合并。

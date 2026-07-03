@@ -1,0 +1,41 @@
+#!/bin/sh
+# Git pre-commit 钩子 — Ontology-as-Code SHACL 回归测试
+#
+# 安装方法（在项目根目录执行）：
+#   cp scripts/pre-commit.hook .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+#
+# 功能：
+#   若本次 commit 涉及 docker/ontology/ 下的 OWL/SHACL 文件，
+#   自动运行 check_ontology.py --ci，SHACL 回归失败则拒绝提交。
+
+# NOTE: 仅当本体文件被修改时才触发校验
+CHANGED_ONTOLOGY=$(git diff --cached --name-only | grep -E 'docker/ontology/.*\.(owl|ttl|shacl\.ttl)$')
+
+if [ -z "$CHANGED_ONTOLOGY" ]; then
+    exit 0
+fi
+
+echo ""
+echo "========================================================"
+echo "  🔬 检测到本体文件变更，运行 SHACL 回归测试..."
+echo "========================================================"
+echo "  变更文件:"
+echo "$CHANGED_ONTOLOGY" | sed 's/^/    /'
+echo ""
+
+python scripts/check_ontology.py --ci --no-color
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo ""
+    echo "========================================================"
+    echo "  ❌ 提交已被拒绝：SHACL 回归测试失败"
+    echo "  修复本体约束后再重新提交。"
+    echo "  若要跳过此检查（不推荐）：git commit --no-verify"
+    echo "========================================================"
+    exit 1
+fi
+
+echo "  ✅ SHACL 回归通过，允许提交。"
+exit 0

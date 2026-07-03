@@ -1,0 +1,114 @@
+services:
+  neo4j:
+    image: neo4j:5.25-enterprise
+    container_name: agent-os-neo4j
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    environment:
+      NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD:-agentos123}"
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      NEO4J_PLUGINS: '["apoc", "n10s"]'
+      NEO4J_server_memory_pagecache_size: "256M"
+      NEO4J_server_memory_heap_initial__size: "256M"
+      NEO4J_server_memory_heap_max__size: "512M"
+      NEO4J_dbms_security_procedures_unrestricted: "n10s.*,apoc.*"
+      NEO4J_dbms_unmanaged__extension__classes: "n10s.endpoint=/rdf"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - ./neo4j/init-scripts:/docker-entrypoint-initdb.d
+      - ./ontology:/var/lib/neo4j/import/ontology
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p $${NEO4J_PASSWORD:-agentos123} 'RETURN 1' 2>/dev/null || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  # ── Langfuse OpenTelemetry Traces Backend ──
+  langfuse-postgres:
+    image: postgres:15-alpine
+    container_name: agent-os-langfuse-postgres
+    environment:
+      POSTGRES_DB: langfuse
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: langfuse
+    volumes:
+      - langfuse_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langfuse -d langfuse -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  langfuse-redis:
+    image: redis:7-alpine
+    container_name: agent-os-langfuse-redis
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - langfuse_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  langfuse-web:
+    image: langfuse/langfuse:2.90.0
+    container_name: agent-os-langfuse-web
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://langfuse:langfuse@langfuse-postgres:5432/langfuse
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: langfuse-nextauth-secret-dev
+      SALT: langfuse-salt-dev
+      REDIS_URL: redis://langfuse-redis:6379
+      ENCRYPTION_KEY: 07af88cd19a9f0fdaf08d475b82535eb7f0b0a948da57516aca18e8f9e864f9e
+      TELEMETRY_ENABLED: "false"
+      AUTH_DISABLE_SIGNUP: "false"
+      LANGFUSE_AUTO_DASHBOARD: "false"
+    depends_on:
+      langfuse-postgres:
+        condition: service_healthy
+      langfuse-redis:
+        condition: service_healthy
+
+  langfuse-worker:
+    image: langfuse/langfuse-worker:2.90.0
+    container_name: agent-os-langfuse-worker
+    environment:
+      DATABASE_URL: postgresql://langfuse:langfuse@langfuse-postgres:5432/langfuse
+      REDIS_URL: redis://langfuse-redis:6379
+      ENCRYPTION_KEY: 07af88cd19a9f0fdaf08d475b82535eb7f0b0a948da57516aca18e8f9e864f9e
+    depends_on:
+      langfuse-postgres:
+        condition: service_healthy
+      langfuse-redis:
+        condition: service_healthy
+
+  # ── OpenTelemetry Collector ──
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: agent-os-otel-collector
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    environment:
+      LANGFUSE_PUBLIC_KEY: "${LANGFUSE_PUBLIC_KEY:-pk-lh-placeholder}"
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+    command: ["--config=/etc/otelcol/config.yaml"]
+    depends_on:
+      - langfuse-web
+    restart: unless-stopped
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  langfuse_postgres_data:
+  langfuse_redis_data:

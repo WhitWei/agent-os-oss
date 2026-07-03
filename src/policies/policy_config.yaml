@@ -1,0 +1,63 @@
+# ── Agent OS ZeroClaw — Autonomy Policy ──
+# Least-privilege policy declaration for the Agent OS runtime.
+# All paths below are relative to the Agent OS workspace root.
+
+version: "1.0"
+description: "Minimum privilege policy for Agent OS MVP PoC"
+
+# ── Filesystem Scope ──
+filesystem:
+  # Allowed read/write paths (absolute or workspace-relative)
+  # The agent process is sandboxed to ONLY these paths.
+  allowed_paths:
+    - "/Users/qingwei/agent-os-poc/**"  # Workspace root
+    - "/tmp/agent-os-poc/**"            # Temporary scratch area
+  # Explicitly denied paths (takes precedence over allowed)
+  denied_paths:
+    - "/Users/qingwei/agent-os-poc/.env"
+    - "/Users/qingwei/agent-os-poc/.env.local"
+    - "/etc/**"
+    - "/var/**"
+    - "/usr/**"
+
+# ── Command Allowlist ──
+commands:
+  mode: "allowlist"  # allowlist | denylist
+  allowed:
+    - "ls"
+    - "cat"       # restricted to allowed_paths
+    - "echo"
+    - "pytest"
+    - "python3"
+    - "pip"
+    - "git"
+    - "docker"
+    - "docker-compose"
+  denied: []  # Explicitly denied when mode=allowlist
+
+# ── Write Quotas ──
+write_quotas:
+  max_operations_per_session: 50
+  max_operations_per_minute: 10
+  # Domains that MUST go through SHACL validation before writes
+  shacl_required_domains:
+    - "it-asset-mgmt"
+    - "hr"
+    - "finance"
+
+# ── Network Egress ──
+network:
+  # Allowed outbound hosts/ports
+  allowed_hosts:
+    - "localhost:7687"    # Neo4j
+    - "localhost:8100"    # MCP Gateway
+    - "localhost:8000"    # Feishu webhook (inbound)
+    - "open.feishu.cn"    # Feishu API
+    - "api.github.com"    # (future CI/CD)
+  # Deny all other outbound connections
+  default_policy: "deny"
+
+# ── Session Limits ──
+session:
+  max_duration_seconds: 3600   # 1 hour
+  max_token_budget_usd: 0.50   # $0.50 max per session (to be enforced by cost hook)

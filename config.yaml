@@ -1,0 +1,72 @@
+# Agent OS MVP Configuration
+# ============================
+# Unified config for ZeroClaw kernel, adapters, Neo4j, MCP governance, and autonomy policies.
+# Use ${ENV_VAR} syntax for secrets — resolved from environment variables at load time.
+
+# ── ZeroClaw Kernel ──────────────────────────────────────
+kernel:
+  name: "ZeroClaw"
+  version: "0.1.0"
+  log_level: "INFO"
+  session_ttl_seconds: 300
+
+# ── IM Channel Adapters ──────────────────────────────────
+adapters:
+  feishu:
+    enabled: false
+    app_id: "${FEISHU_APP_ID}"
+    app_secret: "${FEISHU_APP_SECRET}"
+    verification_token: "${FEISHU_VERIFICATION_TOKEN}"
+    encrypt_key: "${FEISHU_ENCRYPT_KEY}"
+    webhook_path: "/webhook/feishu"
+    listen_host: "0.0.0.0"
+    listen_port: 8000
+  cli:
+    enabled: true  # Always available for dev/debug
+
+# ── Neo4j / Semantics ────────────────────────────────────
+neo4j:
+  uri: "bolt://localhost:7687"
+  user: "neo4j"
+  password: "${NEO4J_PASSWORD:-agentos123}"
+  database: "neo4j"
+  n10s:
+    enabled: true
+    rdf_format: "Turtle"
+
+# ── MCP Governance Gateway ───────────────────────────────
+mcp:
+  server_name: "agent-os-governance"
+  transport: "streamable-http"
+  host: "0.0.0.0"
+  port: 8100
+  validation:
+    nonce_secret: "${MCP_NONCE_SECRET:-dev-nonce-secret-change-in-prod}"
+    nonce_ttl_seconds: 300
+
+# ── Autonomy Policy ──────────────────────────────────────
+autonomy:
+  policy_file: "src/policies/policy_config.yaml"
+
+# ── Ontology ─────────────────────────────────────────────
+ontology:
+  owl_dir: "docker/ontology"
+  shacl_dir: "docker/ontology"
+  domains:
+    - name: "it-asset-mgmt"
+      owl_file: "it-asset-mgmt.owl"
+      shacl_file: "it-asset-mgmt.shacl.ttl"
+
+# ── Observability / OpenTelemetry ────────────────────────
+observability:
+  enabled: true
+  service_name: "agent-os-poc"
+  otlp_endpoint: "http://localhost:4317"
+  sample_rate: 1.0
+
+# ── Langfuse (self-hosted) ───────────────────────────────
+langfuse:
+  enabled: true
+  public_key: "${LANGFUSE_PUBLIC_KEY:-}"
+  secret_key: "${LANGFUSE_SECRET_KEY:-}"
+  host: "http://localhost:3000"

@@ -1,0 +1,114 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix asset: <http://agent-os.local/ontology/it-asset-mgmt#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ── SHACL Shape: Employee must have employeeId and employeeName ──
+asset:EmployeeShape
+    rdf:type sh:NodeShape ;
+    sh:targetClass asset:Employee ;
+    sh:property [
+        sh:path asset:employeeId ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:name "employeeId" ;
+        sh:description "Employee ID is required and must be a string." ;
+    ] ;
+    sh:property [
+        sh:path asset:employeeName ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:name "employeeName" ;
+        sh:description "Employee name is required and must be a string." ;
+    ] .
+
+# ── SHACL Shape: HardwareAsset must have serialNumber and model ──
+asset:HardwareAssetShape
+    rdf:type sh:NodeShape ;
+    sh:targetClass asset:HardwareAsset ;
+    sh:property [
+        sh:path asset:serialNumber ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:name "serialNumber" ;
+        sh:description "Serial number is required for hardware assets." ;
+    ] ;
+    sh:property [
+        sh:path asset:assetModel ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:name "assetModel" ;
+        sh:description "Model name/number is required for hardware assets." ;
+    ] ;
+    sh:property [
+        sh:path asset:sensitivityLevel ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:name "sensitivityLevel" ;
+        sh:description "Sensitivity must be one of LOW, MEDIUM, HIGH, CRITICAL." ;
+    ] .
+
+# ── SHACL Shape: SoftwareAsset must have licenseKey and softwareName ──
+asset:SoftwareAssetShape
+    rdf:type sh:NodeShape ;
+    sh:targetClass asset:SoftwareAsset ;
+    sh:property [
+        sh:path asset:licenseKey ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:name "licenseKey" ;
+        sh:description "License key is required for software assets." ;
+    ] ;
+    sh:property [
+        sh:path asset:softwareName ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:name "softwareName" ;
+        sh:description "Software name is required for software assets." ;
+    ] .
+
+# ── SHACL Shape: Department must have a name ──
+asset:DepartmentShape
+    rdf:type sh:NodeShape ;
+    sh:targetClass asset:Department ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:name "departmentName" ;
+        sh:description "Department name is required." ;
+    ] .
+
+# ── SHACL Shape: AssetAssignment must have a date ──
+asset:AssetAssignmentShape
+    rdf:type sh:NodeShape ;
+    sh:targetClass asset:AssetAssignment ;
+    sh:property [
+        sh:path asset:assignedDate ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:name "assignedDate" ;
+        sh:description "Assignment date is required." ;
+    ] .
+
+# ── SHACL Shape: Critical Assets require approval (business rule) ──
+asset:SensitiveAssetApprovalShape
+    rdf:type sh:NodeShape ;
+    sh:targetClass asset:Asset ;
+    sh:property [
+        sh:path asset:approvalRequired ;
+        sh:datatype xsd:boolean ;
+        sh:hasValue true ;
+        sh:name "approvalRequiredForSensitive" ;
+        sh:description "Assets with sensitivity CRITICAL must have approvalRequired = true." ;
+    ] ;
+    sh:message "CRITICAL sensitivity assets require mandatory approval." .

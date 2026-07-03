@@ -1,0 +1,128 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix asset: <http://agent-os.local/ontology/it-asset-mgmt#> .
+
+# ── Ontology Declaration ──
+<http://agent-os.local/ontology/it-asset-mgmt>
+    rdf:type owl:Ontology ;
+    rdfs:label "IT Asset Management Ontology"@en ;
+    rdfs:comment "Top-level ontology for managing IT hardware and software assets within an organization."@en .
+
+# ── Classes ──
+
+asset:Department rdf:type owl:Class ;
+    rdfs:label "Department"@en ;
+    rdfs:comment "An organizational department."@en .
+
+asset:Employee rdf:type owl:Class ;
+    rdfs:label "Employee"@en ;
+    rdfs:comment "An employee who may be assigned IT assets."@en .
+
+asset:Manager rdf:type owl:Class ;
+    rdfs:label "Manager"@en ;
+    rdfs:comment "An employee with managerial authority."@en ;
+    rdfs:subClassOf asset:Employee .
+
+asset:Asset rdf:type owl:Class ;
+    rdfs:label "Asset"@en ;
+    rdfs:comment "A tracked IT resource."@en .
+
+asset:HardwareAsset rdf:type owl:Class ;
+    rdfs:label "Hardware Asset"@en ;
+    rdfs:comment "Physical IT equipment (laptops, monitors, phones)."@en ;
+    rdfs:subClassOf asset:Asset .
+
+asset:SoftwareAsset rdf:type owl:Class ;
+    rdfs:label "Software Asset"@en ;
+    rdfs:comment "Software licenses and subscriptions."@en ;
+    rdfs:subClassOf asset:Asset .
+
+asset:Vendor rdf:type owl:Class ;
+    rdfs:label "Vendor"@en ;
+    rdfs:comment "An external supplier of IT assets."@en .
+
+asset:AssetAssignment rdf:type owl:Class ;
+    rdfs:label "Asset Assignment"@en ;
+    rdfs:comment "Represents the assignment of an asset to an employee."@en .
+
+# ── Object Properties ──
+
+asset:manages rdf:type owl:ObjectProperty ;
+    rdfs:label "manages"@en ;
+    rdfs:domain asset:Manager ;
+    rdfs:range asset:Employee .
+
+asset:belongsTo rdf:type owl:ObjectProperty ;
+    rdfs:label "belongs to"@en ;
+    rdfs:domain asset:Employee ;
+    rdfs:range asset:Department .
+
+asset:assignedTo rdf:type owl:ObjectProperty ;
+    rdfs:label "assigned to"@en ;
+    rdfs:domain asset:Asset ;
+    rdfs:range asset:Employee .
+
+asset:assignedVia rdf:type owl:ObjectProperty ;
+    rdfs:label "assigned via"@en ;
+    rdfs:domain asset:Asset ;
+    rdfs:range asset:AssetAssignment .
+
+asset:purchasedFrom rdf:type owl:ObjectProperty ;
+    rdfs:label "purchased from"@en ;
+    rdfs:domain asset:Asset ;
+    rdfs:range asset:Vendor .
+
+asset:approvedBy rdf:type owl:ObjectProperty ;
+    rdfs:label "approved by"@en ;
+    rdfs:domain asset:AssetAssignment ;
+    rdfs:range asset:Manager .
+
+# ── Data Properties ──
+
+asset:employeeId rdf:type owl:DatatypeProperty ;
+    rdfs:label "employee ID"@en ;
+    rdfs:domain asset:Employee ;
+    rdfs:range xsd:string .
+
+asset:employeeName rdf:type owl:DatatypeProperty ;
+    rdfs:label "employee name"@en ;
+    rdfs:domain asset:Employee ;
+    rdfs:range xsd:string .
+
+asset:serialNumber rdf:type owl:DatatypeProperty ;
+    rdfs:label "serial number"@en ;
+    rdfs:domain asset:HardwareAsset ;
+    rdfs:range xsd:string .
+
+asset:assetModel rdf:type owl:DatatypeProperty ;
+    rdfs:label "model"@en ;
+    rdfs:domain asset:HardwareAsset ;
+    rdfs:range xsd:string .
+
+asset:licenseKey rdf:type owl:DatatypeProperty ;
+    rdfs:label "license key"@en ;
+    rdfs:domain asset:SoftwareAsset ;
+    rdfs:range xsd:string .
+
+asset:softwareName rdf:type owl:DatatypeProperty ;
+    rdfs:label "software name"@en ;
+    rdfs:domain asset:SoftwareAsset ;
+    rdfs:range xsd:string .
+
+asset:assignedDate rdf:type owl:DatatypeProperty ;
+    rdfs:label "assignment date"@en ;
+    rdfs:domain asset:AssetAssignment ;
+    rdfs:range xsd:date .
+
+asset:approvalRequired rdf:type owl:DatatypeProperty ;
+    rdfs:label "approval required"@en ;
+    rdfs:domain asset:Asset ;
+    rdfs:range xsd:boolean .
+
+asset:sensitivityLevel rdf:type owl:DatatypeProperty ;
+    rdfs:label "sensitivity level"@en ;
+    rdfs:domain asset:Asset ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Sensitivity classification: LOW, MEDIUM, HIGH, CRITICAL"@en .
