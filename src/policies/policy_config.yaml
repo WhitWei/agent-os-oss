@@ -10,12 +10,12 @@ filesystem:
   # Allowed read/write paths (absolute or workspace-relative)
   # The agent process is sandboxed to ONLY these paths.
   allowed_paths:
-    - "/Users/qingwei/agent-os-poc/**"  # Workspace root
+    - "./**"                            # Workspace root
     - "/tmp/agent-os-poc/**"            # Temporary scratch area
   # Explicitly denied paths (takes precedence over allowed)
   denied_paths:
-    - "/Users/qingwei/agent-os-poc/.env"
-    - "/Users/qingwei/agent-os-poc/.env.local"
+    - "./.env"
+    - "./.env.local"
     - "/etc/**"
     - "/var/**"
     - "/usr/**"

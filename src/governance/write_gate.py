@@ -31,7 +31,7 @@ from rdflib.namespace import RDF
 from governance.neo4j_client import Neo4jClient
 from governance.schema_provider import SchemaProvider
 from governance.shacl_validator import SHACLValidationReport, SHACLValidator
-from zeroclaw.exceptions import (
+from agentos_kernel.exceptions import (
     GovernanceError,
     SHACLValidationError,
     WriteGateError,

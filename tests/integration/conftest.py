@@ -17,12 +17,12 @@ from pathlib import Path
 
 import pytest
 
-from zeroclaw.config import DomainConfig
+from agentos_kernel.config import DomainConfig
 from governance.schema_provider import SchemaProvider
 from governance.write_gate import WriteGate
 from policies.autonomy_policy import load_policy
 from security.billing_fuse import BillingFuse, BillingFuseConfig
-from zeroclaw.kernel import ZeroClawKernel
+from agentos_kernel.kernel import AgentOSKernel
 
 
 def _docker_available() -> bool:
@@ -92,10 +92,10 @@ def autonomy_policy(app_config):
 
 
 @pytest.fixture
-def wired_kernel(app_config, real_write_gate, autonomy_policy) -> ZeroClawKernel:
+def wired_kernel(app_config, real_write_gate, autonomy_policy) -> AgentOSKernel:
     """完整接线的 kernel —— firewall/circuit_breaker/billing_fuse 由 kernel 内部
     自行构造（走真实 __init__ 默认路径），不注入任何 Mock。"""
-    return ZeroClawKernel(
+    return AgentOSKernel(
         config=app_config,
         write_gate=real_write_gate,
         autonomy_policy=autonomy_policy,
@@ -103,11 +103,11 @@ def wired_kernel(app_config, real_write_gate, autonomy_policy) -> ZeroClawKernel
 
 
 @pytest.fixture
-def wired_kernel_small_budget(app_config, real_write_gate, autonomy_policy) -> ZeroClawKernel:
+def wired_kernel_small_budget(app_config, real_write_gate, autonomy_policy) -> AgentOSKernel:
     """同上，但注入一个真实的、小额度的 BillingFuse，让计费熔断能在 2~3 次调用内
     确定性触发，避免依赖默认 $0.50 预算下"第一条消息就必定触发"这种脆弱断言。"""
     small_budget_fuse = BillingFuse(BillingFuseConfig(budget_cap_usd=10.0))
-    return ZeroClawKernel(
+    return AgentOSKernel(
         config=app_config,
         write_gate=real_write_gate,
         autonomy_policy=autonomy_policy,
@@ -116,9 +116,9 @@ def wired_kernel_small_budget(app_config, real_write_gate, autonomy_policy) -> Z
 
 
 @pytest.fixture
-def wired_kernel_broken_schema(app_config, broken_write_gate, autonomy_policy) -> ZeroClawKernel:
+def wired_kernel_broken_schema(app_config, broken_write_gate, autonomy_policy) -> AgentOSKernel:
     """schema 查询必定失败的 kernel —— 用于验证熔断器在主入口路径上真实生效。"""
-    return ZeroClawKernel(
+    return AgentOSKernel(
         config=app_config,
         write_gate=broken_write_gate,
         autonomy_policy=autonomy_policy,

@@ -17,7 +17,7 @@ from database.state_store import WorkflowStateStore
 from tests.e2e.business_data import assignment_ttl, count_resource_nodes, onboarding_data
 from workflow.sop_engine import SOPEngine
 from workflow.sop_schema import SOPRunState
-from zeroclaw.config import Neo4jConfig
+from agentos_kernel.config import Neo4jConfig
 
 pytestmark = pytest.mark.integration
 

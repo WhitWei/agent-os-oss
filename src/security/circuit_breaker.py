@@ -36,7 +36,7 @@ from typing import Optional
 
 import numpy as np
 
-from zeroclaw.exceptions import CircuitBreakerOpenError
+from agentos_kernel.exceptions import CircuitBreakerOpenError
 
 logger = logging.getLogger(__name__)
 

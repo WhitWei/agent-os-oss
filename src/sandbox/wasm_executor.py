@@ -20,7 +20,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from zeroclaw.exceptions import SandboxError
+from agentos_kernel.exceptions import SandboxError
 
 logger = logging.getLogger(__name__)
 

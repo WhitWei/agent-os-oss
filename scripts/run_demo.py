@@ -22,8 +22,8 @@ from pathlib import Path
 # Ensure src is on the path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from zeroclaw.config import ConfigLoader
-from zeroclaw.kernel import ChannelMessage, ZeroClawKernel
+from agentos_kernel.config import ConfigLoader
+from agentos_kernel.kernel import ChannelMessage, AgentOSKernel
 from adapters.cli_adapter import CLIAdapter
 from policies.autonomy_policy import load_policy
 from governance.neo4j_client import Neo4jClient
@@ -40,7 +40,7 @@ from sandbox.wasm_executor import WasmSandbox
 from security.firewall import SemanticFirewall
 from security.circuit_breaker import CircuitBreaker, CircuitBreakerConfig
 from security.billing_fuse import BillingFuse, BillingFuseConfig, TokenUsage
-from zeroclaw.exceptions import SandboxError, SecurityInterceptError, BillingFuseTrippedError
+from agentos_kernel.exceptions import SandboxError, SecurityInterceptError, BillingFuseTrippedError
 
 logging.basicConfig(
     level=logging.INFO,
@@ -143,7 +143,7 @@ async def demo_cli_channel(config_path: str) -> None:
     logger.info("✅ Write gate initialized (nonce_ttl=%ds)", config.mcp.validation.nonce_ttl_seconds)
 
     # 6. Initialize Kernel
-    kernel = ZeroClawKernel(
+    kernel = AgentOSKernel(
         config=config,
         write_gate=write_gate,
         autonomy_policy=policy,

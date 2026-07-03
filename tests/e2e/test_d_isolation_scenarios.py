@@ -3,7 +3,7 @@
 D1 验证"业务层"隔离:两个员工的入职流程并发发起，互不串数据。
 D2 验证"架构层"隔离:kernel 的聊天安全钩子与 SOPEngine 的业务执行链路
 是两个完全独立的子系统 —— 这不是假设，是本仓库当前的真实接线状态
-(全仓库搜索确认 ZeroClawKernel 从未调用过 SOPEngine)，用测试把这个事实
+(全仓库搜索确认 AgentOSKernel 从未调用过 SOPEngine)，用测试把这个事实
 钉下来，防止未来有人在不知情的情况下把两者错误地当成"一套安全模型"。
 """
 
@@ -20,9 +20,9 @@ from governance.write_gate import WriteGate
 from tests.e2e.business_data import assignment_ttl, count_resource_nodes, onboarding_data
 from workflow.sop_engine import SOPEngine
 from workflow.sop_schema import SOPRunState
-from zeroclaw.config import DomainConfig
-from zeroclaw.exceptions import CircuitBreakerOpenError
-from zeroclaw.kernel import ChannelMessage, ZeroClawKernel
+from agentos_kernel.config import DomainConfig
+from agentos_kernel.exceptions import CircuitBreakerOpenError
+from agentos_kernel.kernel import ChannelMessage, AgentOSKernel
 
 pytestmark = pytest.mark.integration
 
@@ -122,7 +122,7 @@ class TestD2_KernelSecurityHooksAreIsolatedFromSopEngine:
             neo4j_client=None,
             nonce_secret="e2e-d2-secret",
         )
-        broken_kernel = ZeroClawKernel(
+        broken_kernel = AgentOSKernel(
             config=app_config, write_gate=broken_write_gate,
             autonomy_policy=autonomy_policy,
         )

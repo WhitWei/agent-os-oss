@@ -15,7 +15,7 @@ from pathlib import Path
 # Add 'src' to import path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from zeroclaw.config import ConfigLoader
+from agentos_kernel.config import ConfigLoader
 from governance.schema_provider import SchemaProvider
 from governance.write_gate import WriteGate
 from governance.neo4j_client import Neo4jClient

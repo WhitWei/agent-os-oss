@@ -21,8 +21,8 @@ from governance.schema_provider import SchemaProvider
 from governance.write_gate import WriteGate
 from policies.autonomy_policy import load_policy
 from workflow.sop_engine import SOPEngine
-from zeroclaw.config import Neo4jConfig
-from zeroclaw.kernel import ZeroClawKernel
+from agentos_kernel.config import Neo4jConfig
+from agentos_kernel.kernel import AgentOSKernel
 
 
 def _docker_available() -> bool:
@@ -136,10 +136,10 @@ def sop_engine(schema_provider, write_gate, feedback_db, state_store) -> SOPEngi
 
 
 @pytest.fixture
-def wired_kernel(app_config, write_gate, autonomy_policy) -> ZeroClawKernel:
+def wired_kernel(app_config, write_gate, autonomy_policy) -> AgentOSKernel:
     """完整接线的 kernel(真实防火墙/熔断器/计费熔断),用于 B 组"安全红线嵌入
     业务叙事"场景 —— 验证聊天入口的安全钩子与 SOPEngine 的业务写入路径。"""
-    return ZeroClawKernel(
+    return AgentOSKernel(
         config=app_config,
         write_gate=write_gate,
         autonomy_policy=autonomy_policy,

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from zeroclaw.kernel import ChannelMessage, ChannelResponse
+from agentos_kernel.kernel import ChannelMessage, ChannelResponse
 
 
 class ChannelAdapter(ABC):

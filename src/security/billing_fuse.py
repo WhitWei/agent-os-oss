@@ -24,7 +24,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-from zeroclaw.exceptions import BillingFuseTrippedError
+from agentos_kernel.exceptions import BillingFuseTrippedError
 
 logger = logging.getLogger(__name__)
 

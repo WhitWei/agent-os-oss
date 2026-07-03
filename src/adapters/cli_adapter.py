@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 
-from zeroclaw.kernel import ChannelMessage, ChannelResponse
+from agentos_kernel.kernel import ChannelMessage, ChannelResponse
 from adapters.base import ChannelAdapter
 
 logger = logging.getLogger(__name__)

@@ -26,7 +26,7 @@ from security.circuit_breaker import (
     CircuitBreakerConfig,
     RequestSignature,
 )
-from zeroclaw.exceptions import CircuitBreakerOpenError
+from agentos_kernel.exceptions import CircuitBreakerOpenError
 
 
 @pytest.fixture

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from zeroclaw.config import ConfigLoader, AppConfig, _resolve_env_vars
+from agentos_kernel.config import ConfigLoader, AppConfig, _resolve_env_vars
 
 
 class TestEnvVarResolution:
@@ -58,7 +58,7 @@ class TestConfigLoader:
         config = loader.load()
 
         assert isinstance(config, AppConfig)
-        assert config.kernel.name == "TestZeroClaw"
+        assert config.kernel.name == "TestAgentOS"
         assert config.kernel.version == "0.1.0"
         assert config.mcp.server_name == "test-gateway"
         assert len(config.ontology.domains) == 1
@@ -87,7 +87,7 @@ class TestConfigLoader:
         if config_path.exists():
             loader = ConfigLoader(str(config_path))
             config = loader.load()
-            assert config.kernel.name in ("ZeroClaw", "TestZeroClaw")
+            assert config.kernel.name in ("ZeroClaw", "TestAgentOS")
             assert config.neo4j.uri is not None
 
     def test_adapter_config(self, test_config_yaml: Path):

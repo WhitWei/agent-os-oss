@@ -7,8 +7,8 @@ from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
 
 from neo4j import AsyncGraphDatabase, AsyncSession, AsyncTransaction
-from zeroclaw.config import Neo4jConfig
-from zeroclaw.exceptions import Neo4jConnectionError
+from agentos_kernel.config import Neo4jConfig
+from agentos_kernel.exceptions import Neo4jConnectionError
 
 logger = logging.getLogger(__name__)
 

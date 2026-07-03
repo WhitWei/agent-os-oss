@@ -17,8 +17,8 @@ import pytest
 from governance.neo4j_client import Neo4jClient
 from governance.schema_provider import SchemaProvider
 from governance.write_gate import WriteGate
-from zeroclaw.config import ConfigLoader
-from zeroclaw.exceptions import WriteGateError, SHACLValidationError, GovernanceError
+from agentos_kernel.config import ConfigLoader
+from agentos_kernel.exceptions import WriteGateError, SHACLValidationError, GovernanceError
 
 
 # ── Fixtures ──

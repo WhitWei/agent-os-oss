@@ -23,7 +23,7 @@ from typing import Optional
 import yaml
 from pydantic import BaseModel, Field
 
-from zeroclaw.exceptions import PolicyViolationError
+from agentos_kernel.exceptions import PolicyViolationError
 
 logger = logging.getLogger(__name__)
 

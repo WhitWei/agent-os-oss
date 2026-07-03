@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 from policies.autonomy_policy import AutonomyPolicy, load_policy
-from zeroclaw.exceptions import PolicyViolationError
+from agentos_kernel.exceptions import PolicyViolationError
 
 
 # ── Fixtures ──

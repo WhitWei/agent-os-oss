@@ -5,7 +5,7 @@
 
 这里不直接调用 SemanticFirewall.scan() / CircuitBreaker.record_failure() /
 BillingFuse.record_usage() 来"证明模块本身能用"(那是 L1 单测 test_security_dimensions.py
-已经覆盖的范围)。本文件的每一条断言都必须经过 ZeroClawKernel.wake_up() 这一个
+已经覆盖的范围)。本文件的每一条断言都必须经过 AgentOSKernel.wake_up() 这一个
 真实的系统主入口,证明"钩子真的被接上了",而不是"组件本身没坏"。
 """
 
@@ -13,9 +13,9 @@ from __future__ import annotations
 
 import pytest
 
-from zeroclaw.kernel import ChannelMessage
+from agentos_kernel.kernel import ChannelMessage
 from security.billing_fuse import BillingFuse, BillingFuseConfig
-from zeroclaw.kernel import ZeroClawKernel
+from agentos_kernel.kernel import AgentOSKernel
 
 
 pytestmark = pytest.mark.asyncio
@@ -97,7 +97,7 @@ class TestBillingFuseWiredIntoKernel:
         """反向对照:不含 governance 关键词的问候语不应消耗计费预算 —— 证明
         post-dispatch 钩子确实挂在 wake_up() 里按条件触发,而不是无脑记账。"""
         fuse = BillingFuse(BillingFuseConfig(budget_cap_usd=10.0))
-        kernel = ZeroClawKernel(
+        kernel = AgentOSKernel(
             config=app_config,
             write_gate=real_write_gate,
             autonomy_policy=autonomy_policy,

@@ -12,8 +12,8 @@ import logging
 from dataclasses import dataclass, field
 from typing import Optional
 
-from zeroclaw.config import AppConfig
-from zeroclaw.exceptions import (
+from agentos_kernel.config import AppConfig
+from agentos_kernel.exceptions import (
     AgentOSException,
     PolicyViolationError,
 )
@@ -21,7 +21,7 @@ from zeroclaw.exceptions import (
 logger = logging.getLogger(__name__)
 
 
-class ZeroClawKernel:
+class AgentOSKernel:
     """Core orchestrator for the Agent OS runtime.
 
     Lifecycle:
@@ -91,7 +91,7 @@ class ZeroClawKernel:
             message.sender_name,
         )
 
-        from zeroclaw.exceptions import (
+        from agentos_kernel.exceptions import (
             SecurityInterceptError,
             CircuitBreakerOpenError,
             BillingFuseTrippedError,

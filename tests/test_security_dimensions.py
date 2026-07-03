@@ -46,7 +46,7 @@ class TestSecurityInterceptSpan:
         """emit_security_intercept_span should not crash with valid args."""
         from observability.telemetry import _NoopTracer
         from observability.security_dimensions import emit_security_intercept_span
-        from zeroclaw.exceptions import SecurityInterceptError
+        from agentos_kernel.exceptions import SecurityInterceptError
 
         tracer = _NoopTracer()
         error = SecurityInterceptError(
@@ -60,7 +60,7 @@ class TestSecurityInterceptSpan:
     def test_emit_security_intercept_span_with_none_tracer(self):
         """Should not crash when tracer is None (graceful degradation)."""
         from observability.security_dimensions import emit_security_intercept_span
-        from zeroclaw.exceptions import SecurityInterceptError
+        from agentos_kernel.exceptions import SecurityInterceptError
 
         error = SecurityInterceptError(
             message="Test",
@@ -73,7 +73,7 @@ class TestSecurityInterceptSpan:
     def test_emit_with_non_tracer_object(self):
         """Should not crash even with invalid tracer object."""
         from observability.security_dimensions import emit_security_intercept_span
-        from zeroclaw.exceptions import SecurityInterceptError
+        from agentos_kernel.exceptions import SecurityInterceptError
 
         error = SecurityInterceptError(message="Test", trigger="x", severity="low")
         # A non-tracer object will cause an exception which is caught and logged
@@ -131,7 +131,7 @@ class TestFirewallTracerIntegration:
         """Firewall blocks injection and emits span when tracer is set."""
         from observability.telemetry import _NoopTracer
         from security.firewall import SemanticFirewall
-        from zeroclaw.exceptions import SecurityInterceptError
+        from agentos_kernel.exceptions import SecurityInterceptError
 
         tracer = _NoopTracer()
         fw = SemanticFirewall(tracer=tracer)
@@ -145,7 +145,7 @@ class TestFirewallTracerIntegration:
     def test_firewall_without_tracer_still_blocks(self):
         """Firewall blocks even without tracer (backward compatibility)."""
         from security.firewall import SemanticFirewall
-        from zeroclaw.exceptions import SecurityInterceptError
+        from agentos_kernel.exceptions import SecurityInterceptError
 
         fw = SemanticFirewall()  # No tracer
         with pytest.raises(SecurityInterceptError):

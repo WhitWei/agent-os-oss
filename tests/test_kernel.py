@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-from zeroclaw.config import ConfigLoader
-from zeroclaw.kernel import ZeroClawKernel, ChannelMessage, ChannelResponse
+from agentos_kernel.config import ConfigLoader
+from agentos_kernel.kernel import AgentOSKernel, ChannelMessage, ChannelResponse
 from policies.autonomy_policy import load_policy
 from governance.schema_provider import SchemaProvider
 from governance.write_gate import WriteGate
@@ -54,7 +54,7 @@ def kernel(app_config):
         except Exception:
             pass
 
-    return ZeroClawKernel(
+    return AgentOSKernel(
         config=app_config,
         write_gate=write_gate,
         autonomy_policy=policy,
@@ -64,7 +64,7 @@ def kernel(app_config):
 @pytest.fixture
 def kernel_no_policy(app_config):
     """Create a kernel without autonomy policy."""
-    return ZeroClawKernel(
+    return AgentOSKernel(
         config=app_config,
         write_gate=None,
         autonomy_policy=None,
@@ -221,7 +221,7 @@ class TestKernelSecurityHooks:
         """🚨 INTEGRATION RED LINE: Repeated failed operations must trip the circuit breaker in wake_up."""
         from security.circuit_breaker import CircuitBreaker
         from security.billing_fuse import BillingFuse, BillingFuseConfig
-        from zeroclaw.exceptions import AgentOSException
+        from agentos_kernel.exceptions import AgentOSException
 
         # Isolate and disable billing block
         kernel._circuit_breaker = CircuitBreaker()

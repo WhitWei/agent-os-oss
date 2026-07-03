@@ -1,13 +1,12 @@
 services:
   neo4j:
-    image: neo4j:5.25-enterprise
+    image: neo4j:5.25-community
     container_name: agent-os-neo4j
     ports:
       - "7474:7474"  # HTTP
       - "7687:7687"  # Bolt
     environment:
       NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD:-agentos123}"
-      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
       NEO4J_PLUGINS: '["apoc", "n10s"]'
       NEO4J_server_memory_pagecache_size: "256M"
       NEO4J_server_memory_heap_initial__size: "256M"

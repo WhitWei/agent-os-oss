@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from governance.schema_provider import SchemaProvider, DomainSchema
-from zeroclaw.config import ConfigLoader
+from agentos_kernel.config import ConfigLoader
 
 
 # ── Fixtures ──

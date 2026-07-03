@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import pytest
-from zeroclaw.config import AppConfig, ConfigLoader
+from agentos_kernel.config import AppConfig, ConfigLoader
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ def test_config_yaml(tmp_path: Path) -> Path:
     import yaml
 
     config = {
-        "kernel": {"name": "TestZeroClaw", "version": "0.1.0", "log_level": "DEBUG"},
+        "kernel": {"name": "TestAgentOS", "version": "0.1.0", "log_level": "DEBUG"},
         "adapters": {
             "feishu": {"enabled": False},
             "cli": {"enabled": True},

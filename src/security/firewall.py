@@ -11,7 +11,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Optional, List, Pattern
 
-from zeroclaw.exceptions import SecurityInterceptError
+from agentos_kernel.exceptions import SecurityInterceptError
 
 logger = logging.getLogger(__name__)
 

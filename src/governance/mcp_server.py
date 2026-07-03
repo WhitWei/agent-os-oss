@@ -22,8 +22,8 @@ from mcp.server.fastmcp import FastMCP
 
 from governance.schema_provider import SchemaProvider
 from governance.write_gate import WriteGate
-from zeroclaw.config import AppConfig
-from zeroclaw.exceptions import (
+from agentos_kernel.config import AppConfig
+from agentos_kernel.exceptions import (
     SHACLValidationError,
     WriteGateError,
 )

@@ -5,7 +5,7 @@
 是否真的按预期发生"。
 
 ⚠️ 重要边界说明(写在这里而不是藏起来):本仓库目前没有任何 FastAPI/uvicorn
-主入口把 ZeroClawKernel.wake_up()、SOPEngine、Feishu webhook 回调、MCP
+主入口把 AgentOSKernel.wake_up()、SOPEngine、Feishu webhook 回调、MCP
 Governance Gateway 接成一个可对外提供服务的常驻进程(全仓库搜索
 FastAPI app / main.py 均无结果)。因此本包里的"真实环境模拟"能做到的
 最高集成边界,是直接驱动这些组件的 Python 组合根(composition root)——

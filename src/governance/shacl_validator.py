@@ -14,7 +14,7 @@ import pyshacl
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import RDF
 
-from zeroclaw.exceptions import SHACLValidationError
+from agentos_kernel.exceptions import SHACLValidationError
 
 logger = logging.getLogger(__name__)
 

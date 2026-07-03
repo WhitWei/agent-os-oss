@@ -22,8 +22,8 @@ import time
 from typing import Any, Optional
 
 import httpx
-from zeroclaw.config import FeishuAdapterConfig
-from zeroclaw.kernel import ChannelMessage, ChannelResponse
+from agentos_kernel.config import FeishuAdapterConfig
+from agentos_kernel.kernel import ChannelMessage, ChannelResponse
 from adapters.base import ChannelAdapter
 
 logger = logging.getLogger(__name__)

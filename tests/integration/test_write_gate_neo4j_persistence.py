@@ -17,8 +17,8 @@ import pytest
 from governance.neo4j_client import Neo4jClient
 from governance.schema_provider import SchemaProvider
 from governance.write_gate import WriteGate
-from zeroclaw.config import Neo4jConfig
-from zeroclaw.exceptions import SHACLValidationError
+from agentos_kernel.config import Neo4jConfig
+from agentos_kernel.exceptions import SHACLValidationError
 
 pytestmark = pytest.mark.integration
 

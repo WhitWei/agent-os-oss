@@ -26,7 +26,7 @@ from security.billing_fuse import (
     TokenUsage,
     DEFAULT_PRICING,
 )
-from zeroclaw.exceptions import BillingFuseTrippedError
+from agentos_kernel.exceptions import BillingFuseTrippedError
 
 
 @pytest.fixture

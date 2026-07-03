@@ -16,7 +16,7 @@ from pathlib import Path
 # Ensure src is on the path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from zeroclaw.config import ConfigLoader
+from agentos_kernel.config import ConfigLoader
 from governance.neo4j_client import Neo4jClient
 
 logging.basicConfig(

@@ -42,3 +42,12 @@ htmlcov/
 # Logs
 *.log
 logs/
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+
+# Testcontainers / Ryuk residues
+.ryuk/
+testcontainers.properties
