@@ -41,6 +41,7 @@ There are many frameworks designed to "make LLM Agents smarter" (orchestration, 
 | **Declarative SOP & HITL** | Workflows are defined in YAML. Supports complex state machines, conditional Human-in-the-Loop (HITL) approvals, and persistent execution suspension/resumption across server restarts. |
 | **Runtime Security Moat** | Hooks injected directly into the kernel dispatch cycle: **Semantic Firewall** (blocks prompt injections), **Circuit Breaker** (halts infinite loop failures), **Billing Fuse** (hard stops on API budget overruns), and **Micro-Sandbox** (isolated execution). |
 | **Audit & Feedback Loop** | Every human approval/rejection decision is logged independently with the exact `run_id`, forming a closed loop for future AI behavioral fine-tuning and compliance audits. |
+| **Decoupled Loop Engine Integration** | Seamlessly integrates with external reasoning engines (like GLE/BLE) via subprocess calls. Agent OS acts as the stable governance runtime, while the intelligence loop operates as an independent, loosely-coupled plugin, maximizing architectural flexibility. |
 | **Full-Stack Observability** | Tracing and telemetry are built-in as first-class citizens. Security intercepts and validation errors are distinctly categorized in the trace topology, not buried in text logs. |
 
 ---
