@@ -188,7 +188,7 @@ def start_mcp(port: int, host: str, config: Optional[str]) -> None:
     click.echo(f"✅ MCP server '{app_config.mcp.server_name}' ready on {host}:{port}")
 
     try:
-        asyncio.run(gateway.run())
+        gateway.run()
     except KeyboardInterrupt:
         click.echo("\n⏹️  MCP server stopped.")
 

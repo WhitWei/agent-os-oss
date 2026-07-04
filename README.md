@@ -68,7 +68,7 @@ Edit your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "agent-os": {
-      "command": "agentos",
+      "command": "aos",
       "args": ["start-mcp", "--port", "8100"]
     }
   }
@@ -87,10 +87,10 @@ Agent OS is distributed via PyPI.
 pip install agent-os-oss
 
 # 2. Start the MCP server
-agentos start-mcp --port 8100
+aos start-mcp --port 8100
 
 # 3. (Optional) Run the demo SOP flow
-agentos loop run --task "Run demo"
+aos loop run --task "Run demo"
 ```
 
 ---

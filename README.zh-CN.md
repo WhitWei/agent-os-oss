@@ -68,7 +68,7 @@ Agent OS 可以作为标准的 **Model Context Protocol (MCP)** 服务端无缝�
 {
   "mcpServers": {
     "agent-os": {
-      "command": "agentos",
+      "command": "aos",
       "args": ["start-mcp", "--port", "8100"]
     }
   }
@@ -87,10 +87,10 @@ Agent OS 已在 PyPI 全球发布。
 pip install agent-os-oss
 
 # 2. 启动 MCP 服务
-agentos start-mcp --port 8100
+aos start-mcp --port 8100
 
 # 3. (可选) 运行 Demo SOP 演示流
-agentos loop run --task "Run demo"
+aos loop run --task "Run demo"
 ```
 
 ---

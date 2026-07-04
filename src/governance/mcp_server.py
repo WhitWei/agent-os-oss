@@ -203,11 +203,11 @@ class GovernanceGateway:
                 write_tool_name,
             )
 
-    async def run(self) -> None:
-        """Start the MCP server (streamable HTTP transport)."""
-        logger.info("Starting MCP Governance Gateway...")
-        await self._mcp.run(transport="streamable-http")
+    def run(self) -> None:
+        """Start the MCP server (stdio transport)."""
+        logger.info("Starting MCP Governance Gateway on stdio...")
+        self._mcp.run(transport="stdio")
 
-    async def close(self) -> None:
+    def close(self) -> None:
         """Shut down the MCP server."""
         logger.info("Stopping MCP Governance Gateway...")
