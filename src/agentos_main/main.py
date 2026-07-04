@@ -1,43 +1,36 @@
-"""Agent OS Unified Service — main entry point.
+"""Agent OS Unified Service — global composition root.
 
-Brings together the three previously independent "composition roots"
-(AgentOSKernel, SOPEngine, MCP Governance Gateway) into a single
-deployable FastAPI application with Feishu webhook routing.
+Brings together the three components (AgentOSKernel, SOPEngine, FeishuAdapter)
+into a single deployable FastAPI application with Feishu webhook routing.
 
 Usage:
-    # Start the unified web service (Feishu webhook + SOP orchestration)
-    python -m agentos_kernel.main
+    uvicorn agentos_main.main:app --host 0.0.0.0 --port 8000
 
-    # In a separate terminal, start the MCP governance gateway:
-    aos start-mcp
+Architecture:
+    ┌─ FastAPI (this module) ──────────────────────────┐
+    │  POST /webhook/feishu  ← Feishu event subscription│
+    │    ├─ verify_challenge  → {challenge: "..."}     │
+    │    └─ card callback     → SOPEngine.resume()     │
+    │    └─ IM message        → kernel.wake_up()       │
+    │  GET  /health           → {"status": "ok"}       │
+    │  GET  /api/domains      → list ontology domains  │
+    │  GET  /api/sops         → list SOP YAML files    │
+    │  POST /api/sops/{id}/resume → manual resume       │
+    └──────────────────────────────────────────────────┘
 
-Architecture (WO-A1.1 / P0.1):
-    ┌─ FastAPI (this file) ──────────────────────────────┐
-    │  POST /webhook/feishu  ← Feishu event subscription │
-    │    ├─ verify_challenge  → {challenge: "..."}       │
-    │    ├─ parse_event       → kernel.wake_up()         │
-    │    └─ parse_card_callback → SOPEngine.resume()     │
-    │  GET  /health           → {"status": "ok"}         │
-    │  GET  /api/domains      → list domains             │
-    │  GET  /api/sops         → list SOP YAML files      │
-    │  POST /api/sops/{id}/resume → manual resume        │
-    └────────────────────────────────────────────────────┘
-
-Components are initialised in a FastAPI lifespan hook and stored
-in request.app.state.bootstrap for route handlers.
+Per architecture decision: Agent OS does NOT bundle an LLM driver.
+Users Bring Their Own LLM and call the MCP governance gateway
+(get_schema / verify_shacl / execute_governed_write) as tools.
 """
 
 from __future__ import annotations
 
-import json
 import logging
 import os
-import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-import yaml
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -50,10 +43,11 @@ logger = logging.getLogger(__name__)
 
 
 class ServiceBootstrap:
-    """Holds references to all service components after initialisation.
+    """Single composition root for all Agent OS service components.
 
-    This is the single composition root that replaces the three previously
-    independent composition roots (kernel.py, sop_engine.py, mcp_server.py).
+    Each component is optional — unavailable resources degrade gracefully
+    rather than crash.  This is the global composition root that replaces
+    the three previously independent composition roots.
     """
 
     def __init__(self) -> None:
@@ -67,16 +61,10 @@ class ServiceBootstrap:
         self.state_store = None
         self.policy = None
         self.feishu = None
-        self.llm_driver = None
         self.available_sops: list[dict[str, Any]] = []
 
     async def init(self, config_path: str = "config.yaml") -> None:
-        """Bootstrap all components from config file.
-
-        Each component is optional — if a resource is unavailable (e.g. Neo4j
-        is down, ANTHROPIC_API_KEY not set), the service degrades gracefully
-        and logs a warning rather than crashing.
-        """
+        """Bootstrap all components from config file."""
         from agentos_kernel.config import ConfigLoader
         from governance.schema_provider import SchemaProvider
         from governance.write_gate import WriteGate
@@ -152,10 +140,7 @@ class ServiceBootstrap:
         # 8. Discover available SOP YAML files
         self._discover_sops()
 
-        # 9. LLM driver (optional — graceful fallback to keyword matching)
-        self._init_llm_driver()
-
-        # 10. Agent OS kernel
+        # 9. Agent OS kernel
         self.kernel = AgentOSKernel(
             config=app_config,
             write_gate=self.write_gate,
@@ -163,7 +148,7 @@ class ServiceBootstrap:
         )
         logger.info("Agent OS kernel initialised")
 
-        # 11. Feishu adapter (optional)
+        # 10. Feishu adapter (optional)
         try:
             from adapters.feishu_adapter import FeishuAdapter
             self.feishu = FeishuAdapter(
@@ -206,31 +191,12 @@ class ServiceBootstrap:
                     logger.warning("Failed to load SOP %s: %s", f, exc)
         logger.info("Discovered %d SOP(s)", len(self.available_sops))
 
-    def _init_llm_driver(self) -> None:
-        """Initialise LLM driver if ANTHROPIC_API_KEY is available."""
-        api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-        if not api_key:
-            logger.info(
-                "ANTHROPIC_API_KEY not set — using keyword fallback for intent detection. "
-                "Set ANTHROPIC_API_KEY to enable Claude-powered intent classification + RDF generation."
-            )
-            return
-
-        try:
-            from agentos_kernel.llm_driver import ClaudeDriver
-            self.llm_driver = ClaudeDriver(
-                api_key=api_key,
-                model=os.environ.get("AGENT_OS_LLM_MODEL", "claude-sonnet-4-20250514"),
-            )
-            logger.info("Claude driver initialised")
-        except Exception as exc:
-            logger.warning("LLM driver init failed: %s — using keyword fallback", exc)
-
     async def _feishu_message_handler(self, message: Any) -> Any:
-        """Handle Feishu messages — route to SOP or kernel.
+        """Handle Feishu messages by passing directly to the kernel.
 
-        If the message matches a known SOP intent, start the SOP flow.
-        Otherwise, pass through to the kernel for normal processing.
+        Agent OS does NOT bundle an LLM driver — users Bring Your Own LLM
+        and call the MCP governance gateway tools externally.
+        The kernel uses keyword-based intent detection (MVP stub).
         """
         from agentos_kernel.kernel import ChannelResponse
 
@@ -242,88 +208,7 @@ class ServiceBootstrap:
                 error="kernel not ready",
             )
 
-        # Try LLM-driven SOP routing first
-        if self.llm_driver is not None and self.available_sops:
-            try:
-                sop_id = await self.llm_driver.route_to_sop(
-                    message.text, self.available_sops
-                )
-                if sop_id:
-                    return await self._start_sop_flow(sop_id, message)
-            except Exception as exc:
-                logger.warning("LLM SOP routing failed: %s — falling back to kernel", exc)
-
-        # Fallback: kernel's keyword-based processing
         return await self.kernel.wake_up(message)
-
-    async def _start_sop_flow(
-        self, sop_id: str, message: Any
-    ) -> Any:
-        """Start a SOP workflow for a given sop_id."""
-        from agentos_kernel.kernel import ChannelResponse
-        from workflow.sop_schema import SOPRunState
-
-        if self.sop_engine is None:
-            return ChannelResponse(
-                text="SOP engine not available.",
-                channel=message.channel,
-                metadata={"status": "error"},
-                error="SOP engine not initialised",
-            )
-
-        # Find the SOP definition
-        sop_def = None
-        for s in self.available_sops:
-            if s["sop_id"] == sop_id:
-                from workflow.sop_engine import SOPEngine
-                sop_def = SOPEngine.load_sop(s["file"])
-                break
-
-        if sop_def is None:
-            return ChannelResponse(
-                text=f"SOP '{sop_id}' not found.",
-                channel=message.channel,
-                metadata={"status": "error"},
-                error="unknown sop_id",
-            )
-
-        # Create run context and execute
-        ctx = self.sop_engine.create_run(sop_def, data={"user_input": message.text})
-        try:
-            ctx = await self.sop_engine.run(sop_def, ctx)
-        except Exception as exc:
-            logger.error("SOP execution failed: %s", exc)
-            return ChannelResponse(
-                text=f"❌ SOP execution failed: {exc}",
-                channel=message.channel,
-                metadata={"status": "error", "run_id": ctx.run_id},
-                error=str(exc),
-            )
-
-        if ctx.state == SOPRunState.SUSPENDED:
-            return ChannelResponse(
-                text=f"⏳ SOP '{sop_def.name}' has been started and is awaiting your approval. "
-                     f"(Run ID: {ctx.run_id})",
-                channel=message.channel,
-                metadata={
-                    "status": "suspended",
-                    "run_id": ctx.run_id,
-                    "sop_id": sop_id,
-                },
-            )
-
-        if ctx.state == SOPRunState.COMPLETED:
-            return ChannelResponse(
-                text=f"✅ SOP '{sop_def.name}' completed successfully.",
-                channel=message.channel,
-                metadata={"status": "completed", "run_id": ctx.run_id},
-            )
-
-        return ChannelResponse(
-            text=f"ℹ️ SOP '{sop_def.name}' finished with state: {ctx.state.value}",
-            channel=message.channel,
-            metadata={"status": ctx.state.value, "run_id": ctx.run_id},
-        )
 
     async def shutdown(self) -> None:
         """Gracefully shut down all components."""
@@ -353,8 +238,8 @@ def create_app(bootstrap: ServiceBootstrap | None = None) -> FastAPI:
     """Create a configured FastAPI application.
 
     Args:
-        bootstrap: A pre-configured ServiceBootstrap. If None, a new one is
-                   created and initialised in the lifespan hook (production use).
+        bootstrap: Pre-configured ServiceBootstrap.
+                   Pass None for production (auto-init from config.yaml).
                    Pass a mock in tests to avoid real connections.
 
     Returns:
@@ -364,9 +249,7 @@ def create_app(bootstrap: ServiceBootstrap | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def _lifespan(app: FastAPI):
-        """FastAPI lifespan: initialise on start, shutdown on stop."""
         if bootstrap is None:
-            # Only auto-init when no pre-built bootstrap was provided
             config_path = os.environ.get("AGENT_OS_CONFIG", "config.yaml")
             await _bootstrap_ref.init(config_path)
         app.state.bootstrap = _bootstrap_ref
@@ -401,7 +284,6 @@ def create_app(bootstrap: ServiceBootstrap | None = None) -> FastAPI:
             "write_gate": b.write_gate is not None,
             "neo4j": b.neo4j_client is not None,
             "feishu": b.feishu is not None,
-            "llm_driver": b.llm_driver is not None,
             "domains": b.schema_provider.list_domains() if b.schema_provider else [],
             "sops": len(b.available_sops),
         }
@@ -413,7 +295,13 @@ def create_app(bootstrap: ServiceBootstrap | None = None) -> FastAPI:
 
     @app.post("/webhook/feishu")
     async def feishu_webhook(request: Request) -> dict[str, Any]:
-        """Feishu event subscription webhook."""
+        """Feishu event subscription webhook.
+
+        Handles:
+        1. URL verification challenge (respond with challenge token)
+        2. Interactive card callback → SOPEngine.resume
+        3. IM message → kernel.wake_up
+        """
         b = _bootstrap_ref
         if b.feishu is None:
             raise HTTPException(status_code=503, detail="Feishu adapter not configured")
@@ -429,22 +317,10 @@ def create_app(bootstrap: ServiceBootstrap | None = None) -> FastAPI:
         if "action" in body:
             return await _handle_card_callback(body, b)
 
-        # 3) IM message → parse and route
+        # 3) IM message → parse and route to kernel
         message = b.feishu.parse_event(body)
         if message is None:
             return {"status": "ignored", "reason": "unsupported event type"}
-
-        if b.llm_driver is not None and b.available_sops:
-            try:
-                sop_id = await b.llm_driver.route_to_sop(
-                    message.text, b.available_sops
-                )
-                if sop_id:
-                    response = await b._start_sop_flow(sop_id, message)
-                    await b.feishu.send_response(response)
-                    return {"status": "ok", "routed_to": "sop", "sop_id": sop_id}
-            except Exception as exc:
-                logger.warning("LLM SOP routing failed: %s — falling back to kernel", exc)
 
         response = await b.kernel.wake_up(message)
         await b.feishu.send_response(response)
@@ -477,7 +353,10 @@ def create_app(bootstrap: ServiceBootstrap | None = None) -> FastAPI:
 
     @app.post("/api/sops/{run_id}/resume")
     async def resume_sop(run_id: str, request: Request) -> dict[str, Any]:
-        """Manually resume a suspended SOP run."""
+        """Manually resume a suspended SOP run.
+
+        Request body: {"decision": "APPROVED"|"REJECTED", "reason": "...", "approver_id": "..."}
+        """
         b = _bootstrap_ref
         if b.sop_engine is None or b.state_store is None:
             raise HTTPException(status_code=503, detail="SOP engine not available")
@@ -597,7 +476,7 @@ def main() -> None:
 
     logger.info("Starting Agent OS Unified Service on %s:%d ...", host, port)
     uvicorn.run(
-        "agentos_kernel.main:app",
+        "agentos_main.main:app",
         host=host,
         port=port,
         reload=os.environ.get("AGENT_OS_RELOAD", "").lower() in ("1", "true", "yes"),
