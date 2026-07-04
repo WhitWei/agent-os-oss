@@ -13,8 +13,8 @@ from pathlib import Path
 
 import pytest
 
-from policies.autonomy_policy import AutonomyPolicy, load_policy
-from agentos_kernel.exceptions import PolicyViolationError
+from agentos.policies.autonomy_policy import AutonomyPolicy, load_policy
+from agentos.kernel.exceptions import PolicyViolationError
 
 
 # ── Fixtures ──

@@ -1,4 +1,4 @@
-"""L1 单元测试：agentos_main/main.py。
+"""L1 单元测试：agentos.main/main.py。
 
 测试范围（诚实的 L1 边界）：
   1. create_app 工厂函数能正确创建 FastAPI 实例并注册预期路由。
@@ -23,7 +23,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
-from agentos_main.main import create_app, ServiceBootstrap
+from agentos.main.main import create_app, ServiceBootstrap
 
 
 class TestCreateAppFactory:
@@ -167,7 +167,7 @@ class TestCardCallback:
         """使用全 Mock 的 ServiceBootstrap 验证回调处理不崩溃。"""
         # This is a structural check: the function exists and accepts the right types.
         # Real callback logic requires real SOP state and is tested in L2.
-        from agentos_main.main import _handle_card_callback, ServiceBootstrap
+        from agentos.main.main import _handle_card_callback, ServiceBootstrap
 
         bs = MagicMock(spec=ServiceBootstrap)
         bs.feishu = MagicMock()

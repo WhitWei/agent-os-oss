@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import pytest
-from agentos_kernel.config import AppConfig, ConfigLoader
+from agentos.kernel.config import AppConfig, ConfigLoader
 
 logger = logging.getLogger(__name__)
 

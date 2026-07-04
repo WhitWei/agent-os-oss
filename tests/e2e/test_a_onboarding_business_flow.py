@@ -15,7 +15,7 @@ from tests.e2e.business_data import (
     hardware_asset_ttl,
     onboarding_data,
 )
-from workflow.sop_schema import SOPRunState
+from agentos.workflow.sop_schema import SOPRunState
 
 pytestmark = pytest.mark.integration
 

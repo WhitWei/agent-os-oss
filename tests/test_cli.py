@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from agentos_cli.cli import _find_loop_engine, main
+from agentos.cli.cli import _find_loop_engine, main
 
 
 # ── Fixtures ──
@@ -107,10 +107,10 @@ class TestStartMCPCommand:
 
     # ── Pure mock-based happy path (no real deps) ──
 
-    @patch("governance.mcp_server.GovernanceGateway")
-    @patch("governance.write_gate.WriteGate")
-    @patch("governance.schema_provider.SchemaProvider")
-    @patch("agentos_kernel.config.ConfigLoader")
+    @patch("agentos.governance.mcp_server.GovernanceGateway")
+    @patch("agentos.governance.write_gate.WriteGate")
+    @patch("agentos.governance.schema_provider.SchemaProvider")
+    @patch("agentos.kernel.config.ConfigLoader")
     def test_start_mcp_happy_path(
         self,
         mock_config_loader_cls,
@@ -194,8 +194,8 @@ class TestLoopRunCommand:
             assert result.exit_code == 1
             assert "loop-engine not found" in result.output
 
-    @patch("agentos_cli.cli._find_loop_engine")
-    @patch("agentos_cli.cli.subprocess.run")
+    @patch("agentos.cli.cli._find_loop_engine")
+    @patch("agentos.cli.cli.subprocess.run")
     def test_loop_run_happy_path(
         self, mock_subprocess_run, mock_find_engine, runner: CliRunner
     ):
@@ -222,8 +222,8 @@ class TestLoopRunCommand:
             timeout=300,
         )
 
-    @patch("agentos_cli.cli._find_loop_engine")
-    @patch("agentos_cli.cli.subprocess.run")
+    @patch("agentos.cli.cli._find_loop_engine")
+    @patch("agentos.cli.cli.subprocess.run")
     def test_loop_run_failure_exit_code(
         self, mock_subprocess_run, mock_find_engine, runner: CliRunner
     ):
@@ -242,8 +242,8 @@ class TestLoopRunCommand:
         assert result.exit_code == 1
         assert "failed with exit code 1" in result.output
 
-    @patch("agentos_cli.cli._find_loop_engine")
-    @patch("agentos_cli.cli.subprocess.run")
+    @patch("agentos.cli.cli._find_loop_engine")
+    @patch("agentos.cli.cli.subprocess.run")
     def test_loop_run_timeout(
         self, mock_subprocess_run, mock_find_engine, runner: CliRunner
     ):

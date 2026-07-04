@@ -22,7 +22,7 @@ class TestSecuritySpanAttributes:
 
     def test_security_attributes_defined(self):
         """All security intercept attribute keys are defined."""
-        from observability.security_dimensions import SecuritySpanAttributes
+        from agentos.observability.security_dimensions import SecuritySpanAttributes
 
         assert SecuritySpanAttributes.EVENT_TYPE == "security.intercept.event.type"
         assert SecuritySpanAttributes.TRIGGER == "security.intercept.event.trigger"
@@ -31,7 +31,7 @@ class TestSecuritySpanAttributes:
 
     def test_shacl_attributes_defined(self):
         """All SHACL validation error attribute keys are defined."""
-        from observability.security_dimensions import SHACLSpanAttributes
+        from agentos.observability.security_dimensions import SHACLSpanAttributes
 
         assert SHACLSpanAttributes.DOMAIN == "shacl.validation_error.event.domain"
         assert SHACLSpanAttributes.VIOLATION_COUNT == "shacl.validation_error.event.violation_count"
@@ -44,9 +44,9 @@ class TestSecurityInterceptSpan:
 
     def test_emit_security_intercept_span_no_crash(self):
         """emit_security_intercept_span should not crash with valid args."""
-        from observability.telemetry import _NoopTracer
-        from observability.security_dimensions import emit_security_intercept_span
-        from agentos_kernel.exceptions import SecurityInterceptError
+        from agentos.observability.telemetry import _NoopTracer
+        from agentos.observability.security_dimensions import emit_security_intercept_span
+        from agentos.kernel.exceptions import SecurityInterceptError
 
         tracer = _NoopTracer()
         error = SecurityInterceptError(
@@ -59,8 +59,8 @@ class TestSecurityInterceptSpan:
 
     def test_emit_security_intercept_span_with_none_tracer(self):
         """Should not crash when tracer is None (graceful degradation)."""
-        from observability.security_dimensions import emit_security_intercept_span
-        from agentos_kernel.exceptions import SecurityInterceptError
+        from agentos.observability.security_dimensions import emit_security_intercept_span
+        from agentos.kernel.exceptions import SecurityInterceptError
 
         error = SecurityInterceptError(
             message="Test",
@@ -72,8 +72,8 @@ class TestSecurityInterceptSpan:
 
     def test_emit_with_non_tracer_object(self):
         """Should not crash even with invalid tracer object."""
-        from observability.security_dimensions import emit_security_intercept_span
-        from agentos_kernel.exceptions import SecurityInterceptError
+        from agentos.observability.security_dimensions import emit_security_intercept_span
+        from agentos.kernel.exceptions import SecurityInterceptError
 
         error = SecurityInterceptError(message="Test", trigger="x", severity="low")
         # A non-tracer object will cause an exception which is caught and logged
@@ -85,8 +85,8 @@ class TestSHACLValidationErrorSpan:
 
     def test_emit_shacl_span_no_crash(self):
         """emit_shacl_validation_error_span should not crash."""
-        from observability.telemetry import _NoopTracer
-        from observability.security_dimensions import emit_shacl_validation_error_span
+        from agentos.observability.telemetry import _NoopTracer
+        from agentos.observability.security_dimensions import emit_shacl_validation_error_span
 
         # Mock a SHACLValidationReport-like object
         class MockReport:
@@ -105,7 +105,7 @@ class TestSHACLValidationErrorSpan:
 
     def test_emit_shacl_span_with_none_tracer(self):
         """Should not crash when tracer is None."""
-        from observability.security_dimensions import emit_shacl_validation_error_span
+        from agentos.observability.security_dimensions import emit_shacl_validation_error_span
 
         class MockReport:
             results = []
@@ -114,8 +114,8 @@ class TestSHACLValidationErrorSpan:
 
     def test_emit_shacl_span_empty_violations(self):
         """Should handle empty violation list."""
-        from observability.telemetry import _NoopTracer
-        from observability.security_dimensions import emit_shacl_validation_error_span
+        from agentos.observability.telemetry import _NoopTracer
+        from agentos.observability.security_dimensions import emit_shacl_validation_error_span
 
         class MockReport:
             results = []
@@ -129,9 +129,9 @@ class TestFirewallTracerIntegration:
 
     def test_firewall_with_tracer_blocks_but_emits_span(self):
         """Firewall blocks injection and emits span when tracer is set."""
-        from observability.telemetry import _NoopTracer
-        from security.firewall import SemanticFirewall
-        from agentos_kernel.exceptions import SecurityInterceptError
+        from agentos.observability.telemetry import _NoopTracer
+        from agentos.security.firewall import SemanticFirewall
+        from agentos.kernel.exceptions import SecurityInterceptError
 
         tracer = _NoopTracer()
         fw = SemanticFirewall(tracer=tracer)
@@ -144,8 +144,8 @@ class TestFirewallTracerIntegration:
 
     def test_firewall_without_tracer_still_blocks(self):
         """Firewall blocks even without tracer (backward compatibility)."""
-        from security.firewall import SemanticFirewall
-        from agentos_kernel.exceptions import SecurityInterceptError
+        from agentos.security.firewall import SemanticFirewall
+        from agentos.kernel.exceptions import SecurityInterceptError
 
         fw = SemanticFirewall()  # No tracer
         with pytest.raises(SecurityInterceptError):
@@ -156,7 +156,7 @@ class TestFirewallTracerIntegration:
 
     def test_firewall_clean_text_passes(self):
         """Clean text passes without error."""
-        from security.firewall import SemanticFirewall
+        from agentos.security.firewall import SemanticFirewall
 
         fw = SemanticFirewall()
         result = fw.scan("What is the weather in Beijing today?", input_type="user_prompt")

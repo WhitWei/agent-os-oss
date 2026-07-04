@@ -14,11 +14,11 @@ from __future__ import annotations
 
 import pytest
 
-from governance.neo4j_client import Neo4jClient
-from governance.schema_provider import SchemaProvider
-from governance.write_gate import WriteGate
-from agentos_kernel.config import Neo4jConfig
-from agentos_kernel.exceptions import SHACLValidationError
+from agentos.governance.neo4j_client import Neo4jClient
+from agentos.governance.schema_provider import SchemaProvider
+from agentos.governance.write_gate import WriteGate
+from agentos.kernel.config import Neo4jConfig
+from agentos.kernel.exceptions import SHACLValidationError
 
 pytestmark = pytest.mark.integration
 

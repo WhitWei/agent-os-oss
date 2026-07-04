@@ -13,9 +13,9 @@ from __future__ import annotations
 
 import pytest
 
-from agentos_kernel.kernel import ChannelMessage
-from security.billing_fuse import BillingFuse, BillingFuseConfig
-from agentos_kernel.kernel import AgentOSKernel
+from agentos.kernel.kernel import ChannelMessage
+from agentos.security.billing_fuse import BillingFuse, BillingFuseConfig
+from agentos.kernel.kernel import AgentOSKernel
 
 
 pytestmark = pytest.mark.asyncio

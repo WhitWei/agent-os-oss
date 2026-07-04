@@ -3,7 +3,7 @@ testcontainers Neo4j 容器时互相"串数据"。"""
 
 from __future__ import annotations
 
-from governance.neo4j_client import Neo4jClient
+from agentos.governance.neo4j_client import Neo4jClient
 
 
 async def count_resource_nodes(neo4j_client: Neo4jClient, uri: str) -> int:

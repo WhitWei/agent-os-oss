@@ -10,11 +10,11 @@ from pathlib import Path
 
 import pytest
 
-from agentos_kernel.config import ConfigLoader
-from agentos_kernel.kernel import AgentOSKernel, ChannelMessage, ChannelResponse
-from policies.autonomy_policy import load_policy
-from governance.schema_provider import SchemaProvider
-from governance.write_gate import WriteGate
+from agentos.kernel.config import ConfigLoader
+from agentos.kernel.kernel import AgentOSKernel, ChannelMessage, ChannelResponse
+from agentos.policies.autonomy_policy import load_policy
+from agentos.governance.schema_provider import SchemaProvider
+from agentos.governance.write_gate import WriteGate
 
 
 # ── Fixtures ──
@@ -203,7 +203,7 @@ class TestKernelSecurityHooks:
     @pytest.mark.asyncio
     async def test_firewall_intercepts_injection_in_lifecycle(self, kernel):
         """🚨 INTEGRATION RED LINE: Injection prompts must be intercepted by the firewall inside wake_up."""
-        from security.firewall import SemanticFirewall
+        from agentos.security.firewall import SemanticFirewall
         kernel._firewall = SemanticFirewall(tracer=kernel._tracer)
 
         msg = ChannelMessage(
@@ -219,9 +219,9 @@ class TestKernelSecurityHooks:
     @pytest.mark.asyncio
     async def test_circuit_breaker_trips_in_lifecycle(self, kernel):
         """🚨 INTEGRATION RED LINE: Repeated failed operations must trip the circuit breaker in wake_up."""
-        from security.circuit_breaker import CircuitBreaker
-        from security.billing_fuse import BillingFuse, BillingFuseConfig
-        from agentos_kernel.exceptions import AgentOSException
+        from agentos.security.circuit_breaker import CircuitBreaker
+        from agentos.security.billing_fuse import BillingFuse, BillingFuseConfig
+        from agentos.kernel.exceptions import AgentOSException
 
         # Isolate and disable billing block
         kernel._circuit_breaker = CircuitBreaker()
@@ -256,8 +256,8 @@ class TestKernelBillingHooks:
     @pytest.mark.asyncio
     async def test_billing_fuse_trips_in_lifecycle(self, kernel):
         """🚨 INTEGRATION RED LINE: Cumulative token usage exceeding budget cap ($0.50) must trip the billing fuse."""
-        from security.circuit_breaker import CircuitBreaker
-        from security.billing_fuse import BillingFuse, BillingFuseConfig
+        from agentos.security.circuit_breaker import CircuitBreaker
+        from agentos.security.billing_fuse import BillingFuse, BillingFuseConfig
         kernel._circuit_breaker = CircuitBreaker()
         
         # Single verify costs ~$0.0084. Budget cap=0.01.

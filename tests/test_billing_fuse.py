@@ -20,13 +20,13 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from security.billing_fuse import (
+from agentos.security.billing_fuse import (
     BillingFuse,
     BillingFuseConfig,
     TokenUsage,
     DEFAULT_PRICING,
 )
-from agentos_kernel.exceptions import BillingFuseTrippedError
+from agentos.kernel.exceptions import BillingFuseTrippedError
 
 
 @pytest.fixture

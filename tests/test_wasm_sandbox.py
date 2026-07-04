@@ -21,8 +21,8 @@ import pytest
 # Ensure src is importable
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from sandbox.wasm_executor import WasmSandbox, SandboxConfig, WasmExecutionResult
-from agentos_kernel.exceptions import SandboxError
+from agentos.sandbox.wasm_executor import WasmSandbox, SandboxConfig, WasmExecutionResult
+from agentos.kernel.exceptions import SandboxError
 
 # Import WASM test fixtures
 from fixtures_utils import (

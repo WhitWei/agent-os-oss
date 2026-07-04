@@ -14,15 +14,15 @@ from pathlib import Path
 
 import pytest
 
-from database.feedback_db import FeedbackDB
-from database.state_store import WorkflowStateStore
-from governance.neo4j_client import Neo4jClient
-from governance.schema_provider import SchemaProvider
-from governance.write_gate import WriteGate
-from policies.autonomy_policy import load_policy
-from workflow.sop_engine import SOPEngine
-from agentos_kernel.config import Neo4jConfig
-from agentos_kernel.kernel import AgentOSKernel
+from agentos.database.feedback_db import FeedbackDB
+from agentos.database.state_store import WorkflowStateStore
+from agentos.governance.neo4j_client import Neo4jClient
+from agentos.governance.schema_provider import SchemaProvider
+from agentos.governance.write_gate import WriteGate
+from agentos.policies.autonomy_policy import load_policy
+from agentos.workflow.sop_engine import SOPEngine
+from agentos.kernel.config import Neo4jConfig
+from agentos.kernel.kernel import AgentOSKernel
 
 
 def _docker_available() -> bool:

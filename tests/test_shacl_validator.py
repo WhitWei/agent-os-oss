@@ -13,9 +13,9 @@ import pytest
 from rdflib import Graph
 from rdflib.namespace import RDF
 
-from governance.shacl_validator import SHACLValidator, SHACLValidationReport
-from governance.schema_provider import SchemaProvider
-from agentos_kernel.config import ConfigLoader
+from agentos.governance.shacl_validator import SHACLValidator, SHACLValidationReport
+from agentos.governance.schema_provider import SchemaProvider
+from agentos.kernel.config import ConfigLoader
 
 
 # ── Path to SHACL shapes ──
@@ -144,7 +144,7 @@ class TestSHACLReportFormatting:
 
     def test_malformed_rdf_fails_gracefully(self, shacl_validator):
         """Malformed RDF should raise an informative error."""
-        from agentos_kernel.exceptions import SHACLValidationError
+        from agentos.kernel.exceptions import SHACLValidationError
 
         bad_rdf = "this is not RDF {{{"
 

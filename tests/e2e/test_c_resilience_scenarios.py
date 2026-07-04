@@ -9,15 +9,15 @@ from __future__ import annotations
 
 import pytest
 
-from database.feedback_db import FeedbackDB
-from governance.neo4j_client import Neo4jClient
-from governance.schema_provider import SchemaProvider
-from governance.write_gate import WriteGate
-from database.state_store import WorkflowStateStore
+from agentos.database.feedback_db import FeedbackDB
+from agentos.governance.neo4j_client import Neo4jClient
+from agentos.governance.schema_provider import SchemaProvider
+from agentos.governance.write_gate import WriteGate
+from agentos.database.state_store import WorkflowStateStore
 from tests.e2e.business_data import assignment_ttl, count_resource_nodes, onboarding_data
-from workflow.sop_engine import SOPEngine
-from workflow.sop_schema import SOPRunState
-from agentos_kernel.config import Neo4jConfig
+from agentos.workflow.sop_engine import SOPEngine
+from agentos.workflow.sop_schema import SOPRunState
+from agentos.kernel.config import Neo4jConfig
 
 pytestmark = pytest.mark.integration
 

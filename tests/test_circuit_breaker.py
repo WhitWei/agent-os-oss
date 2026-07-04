@@ -21,12 +21,12 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from security.circuit_breaker import (
+from agentos.security.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerConfig,
     RequestSignature,
 )
-from agentos_kernel.exceptions import CircuitBreakerOpenError
+from agentos.kernel.exceptions import CircuitBreakerOpenError
 
 
 @pytest.fixture

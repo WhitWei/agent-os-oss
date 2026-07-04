@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from agentos_kernel.config import ConfigLoader, AppConfig, _resolve_env_vars
+from agentos.kernel.config import ConfigLoader, AppConfig, _resolve_env_vars
 
 
 class TestEnvVarResolution:

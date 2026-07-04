@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-from governance.schema_provider import SchemaProvider, DomainSchema
-from agentos_kernel.config import ConfigLoader
+from agentos.governance.schema_provider import SchemaProvider, DomainSchema
+from agentos.kernel.config import ConfigLoader
 
 
 # ── Fixtures ──

@@ -12,7 +12,7 @@ from click.testing import CliRunner
 from pathlib import Path
 from unittest.mock import patch
 
-from agentos_cli.cli import main
+from agentos.cli.cli import main
 
 pytestmark = [pytest.mark.integration, pytest.mark.asyncio]
 
@@ -65,7 +65,7 @@ autonomy:
 
         # 1. Start validate
         result_validate = subprocess.run([
-            sys.executable, "-m", "agentos_cli.cli", "validate",
+            sys.executable, "-m", "agentos.cli.cli", "validate",
             "--domain", "it-asset-mgmt",
             "--file", str(rdf_file),
             "--config", str(config_file)
@@ -79,7 +79,7 @@ autonomy:
 
         # 2. Run agentos write
         result_write = subprocess.run([
-            sys.executable, "-m", "agentos_cli.cli", "write",
+            sys.executable, "-m", "agentos.cli.cli", "write",
             "--domain", "it-asset-mgmt",
             "--nonce", nonce,
             "--file", str(rdf_file),

@@ -17,12 +17,12 @@ from pathlib import Path
 
 import pytest
 
-from agentos_kernel.config import DomainConfig
-from governance.schema_provider import SchemaProvider
-from governance.write_gate import WriteGate
-from policies.autonomy_policy import load_policy
-from security.billing_fuse import BillingFuse, BillingFuseConfig
-from agentos_kernel.kernel import AgentOSKernel
+from agentos.kernel.config import DomainConfig
+from agentos.governance.schema_provider import SchemaProvider
+from agentos.governance.write_gate import WriteGate
+from agentos.policies.autonomy_policy import load_policy
+from agentos.security.billing_fuse import BillingFuse, BillingFuseConfig
+from agentos.kernel.kernel import AgentOSKernel
 
 @pytest.fixture(scope="session")
 def neo4j_container(docker_available):
@@ -41,8 +41,8 @@ def neo4j_container(docker_available):
 
 @pytest.fixture
 async def neo4j_client(neo4j_container):
-    from governance.neo4j_client import Neo4jClient
-    from agentos_kernel.config import Neo4jConfig
+    from agentos.governance.neo4j_client import Neo4jClient
+    from agentos.kernel.config import Neo4jConfig
     config = Neo4jConfig(
         uri=neo4j_container.get_connection_url(),
         user=neo4j_container.username,

@@ -14,15 +14,15 @@ from pathlib import Path
 
 import pytest
 
-from database.feedback_db import FeedbackDB
-from governance.schema_provider import SchemaProvider
-from governance.write_gate import WriteGate
+from agentos.database.feedback_db import FeedbackDB
+from agentos.governance.schema_provider import SchemaProvider
+from agentos.governance.write_gate import WriteGate
 from tests.e2e.business_data import assignment_ttl, count_resource_nodes, onboarding_data
-from workflow.sop_engine import SOPEngine
-from workflow.sop_schema import SOPRunState
-from agentos_kernel.config import DomainConfig
-from agentos_kernel.exceptions import CircuitBreakerOpenError
-from agentos_kernel.kernel import ChannelMessage, AgentOSKernel
+from agentos.workflow.sop_engine import SOPEngine
+from agentos.workflow.sop_schema import SOPRunState
+from agentos.kernel.config import DomainConfig
+from agentos.kernel.exceptions import CircuitBreakerOpenError
+from agentos.kernel.kernel import ChannelMessage, AgentOSKernel
 
 pytestmark = pytest.mark.integration
 

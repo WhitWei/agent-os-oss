@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from agentos_kernel.kernel import ChannelMessage
+from agentos.kernel.kernel import ChannelMessage
 
 pytestmark = pytest.mark.integration
 pytestmark = pytest.mark.asyncio
@@ -19,8 +19,8 @@ class TestKernelWakeUpWritePersistence:
         self, app_config, neo4j_client, real_write_gate, sample_valid_ttl
     ):
         """完整三段式 + 独立读回校验，通过 kernel.wake_up 执行。"""
-        from agentos_kernel.kernel import AgentOSKernel
-        from policies.autonomy_policy import load_policy
+        from agentos.kernel.kernel import AgentOSKernel
+        from agentos.policies.autonomy_policy import load_policy
 
         sample_valid_ttl = sample_valid_ttl.strip()
         

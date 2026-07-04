@@ -11,9 +11,9 @@ from __future__ import annotations
 import pytest
 
 from tests.e2e.business_data import assignment_ttl, count_resource_nodes
-from agentos_kernel.exceptions import SecurityInterceptError, WriteGateError
-from agentos_kernel.kernel import ChannelMessage
-from workflow.sop_schema import SOPRunState
+from agentos.kernel.exceptions import SecurityInterceptError, WriteGateError
+from agentos.kernel.kernel import ChannelMessage
+from agentos.workflow.sop_schema import SOPRunState
 
 pytestmark = pytest.mark.integration
 

@@ -14,11 +14,11 @@ from pathlib import Path
 
 import pytest
 
-from governance.neo4j_client import Neo4jClient
-from governance.schema_provider import SchemaProvider
-from governance.write_gate import WriteGate
-from agentos_kernel.config import ConfigLoader
-from agentos_kernel.exceptions import WriteGateError, SHACLValidationError, GovernanceError
+from agentos.governance.neo4j_client import Neo4jClient
+from agentos.governance.schema_provider import SchemaProvider
+from agentos.governance.write_gate import WriteGate
+from agentos.kernel.config import ConfigLoader
+from agentos.kernel.exceptions import WriteGateError, SHACLValidationError, GovernanceError
 
 
 # ── Fixtures ──
