@@ -1,112 +1,112 @@
 # 🛡️ Agent OS
 
 <p align="center">
-  <a href="https://github.com/your-username/agent-os-oss/actions"><img src="https://img.shields.io/github/actions/workflow/status/your-username/agent-os-oss/integration-ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"></a>
+  <a href="https://github.com/WhitWei/agent-os-oss/actions"><img src="https://img.shields.io/github/actions/workflow/status/WhitWei/agent-os-oss/integration-ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg?style=flat-square" alt="Python Versions"></a>
-  <a href="docs/平台介绍与操作手册.md"><img src="https://img.shields.io/badge/docs-%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%2C-orange.svg?style=flat-square" alt="Handbook"></a>
 </p>
 
 <p align="center">
-  <b>面向大语言模型智能体（LLM Agent）的安全、可自愈与强治理运行时环境。</b>
-</p>
-
-<p align="center">
-  <a href="README.md">🇺🇸 English README</a>
+  <b>专为大模型智能体打造的企业级治理运行时。</b><br>
+  <i>赋能超级个体与企业 AI 团队，让 Agent 不仅“聪明”，更能做到绝对可信、可审计并受到物理边界约束。</i>
 </p>
 
 ---
 
 ## 💡 什么是 Agent OS？
 
-大语言模型 Agent 能力强大，但赋予它们直接的 shell 命令行、物理文件系统和数据库读写权限极具安全隐患（例如：提示词注入导致本地重要文件丢失，或者陷入代码执行死循环烧光大模型 Token 预算）。
+市面上有许多框架旨在“让大模型智能体更聪明”（如流程编排、逻辑推理、多智能体协作）。但是，当你将 AI 部署到**真实的生产环境与企业系统**中时——尤其是允许 Agent 分配资产、修改财务账本或审批 HR 流程时，仅仅“聪明”是不够的。你需要的是**信任与治理（Trust and Governance）**。
 
-**Agent OS** 是一个轻量级、底座级的运行时安全与权限治理框架。它在大模型 Agent 与物理操作系统/数据库之间充当**“安全护城河”**，对 Agent 输入、指令执行和数据写入进行全方位的拦截、清洗和基于密码学 Nonce 的强治理拦截。
+**Agent OS** 是一个**企业级智能体治理运行时**。它为企业客户在签署合同前最关心的安全问题提供了坚实的“安全与治理护城河”。它确保大模型的每一次高风险操作，都会经过密码学验证、语义约束、留痕审计，并受到预算与安全熔断器的严格物理限制。
+
+```text
+┌─────────────────────────────────────┐
+│  “智能推理”层                        │ ← 你自己接入的 LLM（Claude/GPT）+ 业务 Prompts
+│  (可自带任何 LLM 或编排框架)            │ 
+├─────────────────────────────────────┤
+│  “信任与治理”层                      │ ← Agent OS 提供
+│  (三段式写入闸门 / 安全熔断器 /          │
+│   人机协同审批 / 全栈可观测性)         │
+└─────────────────────────────────────┘
+```
 
 ---
 
-## ⚖️ 核心优势对比
+## 🌟 核心商业价值
 
-| 安全与治理特性 | 原生 Agent SDK (如 LangChain / LlamaIndex) | Agent OS 运行时防御机制 |
+| 核心能力 | 详情说明 |
+| :--- | :--- |
+| **三段式治理写入闸门 (Write Gate)** | 严禁 Agent 裸写 SQL/Cypher。写入操作强制遵循严格的时序：`获取Schema` → `合规性校验`（并签发密码学 HMAC Nonce） → `执行写入`（消耗 Nonce）。从根本上杜绝数据篡改、伪造与重放攻击。 |
+| **本体即代码 (Ontology-as-Code)** | 业务数据模型与约束规则通过声明式定义。CI 流水线会自动运行黄金数据集回归测试，确保校验规则永远不会发生静默退化。 |
+| **声明式 SOP 与人机协同 (HITL)** | 纯 YAML 定义工作流。原生支持复杂状态机流转、基于条件的“人机协同 (HITL)”卡点审批，并且支持跨服务重启的持久化执行挂起与恢复。 |
+| **运行时安全护城河 (Security Moat)** | 安全钩子直接注入系统内核分发周期：**语义防火墙**（拦截 Prompt 注入）、**循环熔断器**（阻断死循环故障）、**计费硬熔断**（触达 API 预算上限物理断电），以及**微沙箱**（隔离执行环境）。 |
+| **审计与反馈闭环 (Feedback Loop)** | 每一次人类的批准/驳回决策，都会与确切的 `run_id` 独立绑定留痕，为未来的 AI 行为微调及合规性审计提供闭环数据支持。 |
+| **解耦式循环引擎集成 (BLE/GLE)** | 无缝支持通过子进程调用与外部推理引擎（如 GLE / BLE）集成联动。Agent OS 负责作为绝对稳定的底层治理运行时，而大模型的智能推理循环（Loop）则作为松耦合的外部插件独立运行，最大化了企业架构的灵活性。 |
+| **全栈可观测性 (Observability)** | 遥测与追踪作为系统一等公民内置。安全拦截事件与数据校验失败事件在 Trace 拓扑图中会被高亮分类，拒绝被淹没在海量的纯文本日志中。 |
+
+---
+
+## ⚖️ Agent OS 的绝对优势
+
+| 安全威胁 | 传统普通 Agent 框架 | Agent OS 运行时 |
 | :--- | :--- | :--- |
-| **文件系统防护** | ❌ 零防护（允许 Agent 任意越界读写） | ✅ 严格的文件目录沙箱控制 (`allowed_paths`) |
-| **外部指令执行** | ❌ 直接调用 eval/system 跑任意指令 | ✅ 强硬的指令白名单控制与 shell 参数动态净化 |
-| **提示词防注入** | ❌ 极易受到提示词越狱/越权攻击 | ✅ 运行时 **SemanticFirewall** 敏感词过滤拦截 |
-| **失控熔断保护** | ❌ 代理死循环直至耗尽企业 Token 预算 | ✅ **BillingFuse** 消费硬熔断与 **CircuitBreaker** 去重熔断 |
-| **数据库物理写入** | ❌ 大模型直接执行任意 Cypher/SQL 写入 | ✅ 密码学 **WriteGate** 三段式 SHACL 规范与 Nonce 授权写入 |
+| **文件系统越权** | ❌ 无限制（允许原生路径操作） | ✅ 严格的沙箱目录白名单隔离 (`allowed_paths`) |
+| **危险命令执行** | ❌ 随意执行系统命令 (exec / system) | ✅ 刚性的命令白名单控制与 Shell 参数净化 |
+| **提示词注入 (Jailbreaks)** | ❌ 极易被恶意 Prompt 越狱劫持 | ✅ 运行时注入 **SemanticFirewall** (语义防火墙) 净化 |
+| **死循环资源耗尽** | ❌ 陷入死循环导致天价 API 账单 | ✅ **BillingFuse** (计费熔断) 与 **CircuitBreaker** 双重保护 |
+| **数据库非法篡改** | ❌ 允许执行原生的数据库语句 | ✅ 采用强密码学 **WriteGate** (写入闸门) 进行三段式校验 |
 
 ---
 
-## 🏗️ 架构与控制流
+## 🔌 MCP Server (Claude Desktop 极简接入)
 
-Agent OS 将安全与遥测拦截钩子优雅地织入了内核调度的完整生命周期中：
+Agent OS 可以作为标准的 **Model Context Protocol (MCP)** 服务端无缝运行，为任何兼容 MCP 的客户端提供“治理网关”。
 
-```mermaid
-graph TD
-    User([Agent 输入]) -->|1. 分发| Kernel[AgentOSKernel]
-    
-    subgraph Pre-Dispatch 运行前拦截
-        Kernel -->|2. 敏感词扫描| Firewall[SemanticFirewall]
-        Kernel -->|3. 去重熔断检测| Breaker[CircuitBreaker]
-    end
-    
-    subgraph Governance 治理隔离区
-        Kernel -->|4. 权限与命令校验| AutonomyPolicy[AutonomyPolicy]
-        Kernel -->|5. SHACL 约束验证| WriteGate[WriteGate]
-        WriteGate -->|6. 密码学 Nonce 校验| NonceCheck{Nonce 签名正确?}
-    end
-    
-    NonceCheck -->|是| Database[(Neo4j 社区版)]
-    NonceCheck -->|否| Block[拒绝物理写入并报错拦截]
-    
-    subgraph Post-Dispatch 运行后熔断
-        Kernel -->|7. 审计 Token 费用| Billing[BillingFuse]
-    end
-    
-    Billing -->|完成| Response([安全动作执行结果])
+### Claude Desktop 3行配置起手式
+编辑你的 `claude_desktop_config.json`：
+```json
+{
+  "mcpServers": {
+    "agent-os": {
+      "command": "agentos",
+      "args": ["start-mcp", "--port", "8100"]
+    }
+  }
+}
 ```
+配置完成！你的 Claude Desktop Agent 瞬间就穿上了 Agent OS 的语义防火墙与治理写入防弹衣。
 
 ---
 
-## 🚀 快速启动（本地开发环境）
+## 🚀 快速开始
 
-### 1. 启动安全存储组件 (Neo4j 与 Langfuse)
-我们已为您备好一键拉起社区开源版存储栈的 compose 脚本：
-```bash
-docker compose -f docker/docker-compose.yml up -d
-```
+Agent OS 已在 PyPI 全球发布。
 
-### 2. 安装项目依赖
 ```bash
-pip install -e ".[dev]"
-```
+# 1. 安装 Agent OS 运行时
+pip install agent-os-oss
 
-### 3. 运行全量集成测试
-一键验证防火墙拦截、重复熔断以及真实 Neo4j 数据库持久化批写入是否正常运行（请确保本地 Docker 守护进程已启动）：
-```bash
-export RYUK_DISABLED=true
-python3 -m pytest tests/ -v
-```
+# 2. 启动 MCP 服务
+agentos start-mcp --port 8100
 
-### 4. 运行演示 Demo
-在终端观察运行时内核对正常/恶意请求的过滤与阻断逻辑：
-```bash
-python3 scripts/run_demo.py
+# 3. (可选) 运行 Demo SOP 演示流
+agentos loop run --task "Run demo"
 ```
 
 ---
 
-## 🛡️ 强制三层测试防御体系
+## 🛡️ 三层测试防御体系（Rule 10 宪法）
 
-我们拒绝“摆拍式”单测，任何合流 PR 必须严格通过三层质量门禁：
-1.  **L1 单元测试**：全 Mock，验证单个方法逻辑。
-2.  **L2 集成接线测试**：不 Mock 内部核心防火墙。使用 `testcontainers` 真实拉起 Neo4j 进行落库和 OTel 遥测比对。
-3.  **L3 E2E 冒烟测试**：100% 真实部署，走完员工入职 SOP 卡片流转。
+Agent OS 强制推行严苛的工程纪律，确保所有“宣称的安全组件”都被物理接线到了主运行流程中。我们交付的是一套三层防御体系：
 
-详情请参考 [开源贡献指南 (CONTRIBUTING.md)](CONTRIBUTING.md)。
+1. **L1 单元测试**：纯组件级逻辑校验，剥离外部依赖。
+2. **L2 集成/接线测试**：通过临时容器 (Ephemeral Containers) 物理拉起真实的数据库。**严禁** Mock 内部的安全与治理组件，真实断言批量事务写入的落库结果。
+3. **L3 E2E / UAT 冒烟测试**：100% 模拟真实用户的业务工作流（如：员工入职 SOP 卡片审批），将整个系统作为黑盒进行外部端点断言。
+
+自动化的 CI 流水线会在检测到任何“孤儿能力”（写了安全组件但没接入主入口）时，物理拦截代码合并。
 
 ---
 
-## 📄 授权协议
+## 📄 开源协议
 
-本项目采用 MIT 开源授权协议。详情请参阅 [LICENSE](LICENSE)。
+本项目基于 MIT 协议开源。查看 [LICENSE](LICENSE) 获取更多信息。
