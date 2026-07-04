@@ -16,11 +16,9 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from governance.schema_provider import SchemaProvider
 from governance.write_gate import WriteGate
 from agentos_kernel.config import AppConfig
 from agentos_kernel.exceptions import (
@@ -63,6 +61,88 @@ class GovernanceGateway:
         """Register all governance tools for each configured domain."""
         mcp = self._mcp
         write_gate = self._write_gate
+
+        # ── Default tool 0: list_domains (auto-discover available domains) ──
+        @mcp.tool()
+        async def list_domains() -> str:
+            """List all available ontology domains with governed write support.
+
+            Returns a JSON array of domain names that can be used with
+            get_{domain}_schema, verify_shacl_compliance, and execute_governed_write.
+            """
+            domains = [d.name for d in self._config.ontology.domains]
+            return json.dumps({
+                "domains": domains,
+                "count": len(domains),
+                "hint": "Use get_{domain}_schema to retrieve the schema for a specific domain.",
+            }, indent=2)
+
+        # ── Default tool: execute_untrusted_code (WASM micro-sandbox) ──
+        # Only register if wasmtime is available
+        try:
+            import importlib.util
+            _has_wasmtime = importlib.util.find_spec("wasmtime") is not None
+        except ImportError:
+            _has_wasmtime = False
+
+        if _has_wasmtime:
+            @mcp.tool()
+            async def execute_untrusted_code(
+                wasm_base64: str,
+                entrypoint: str = "main",
+                args: list = [],
+                memory_limit_mb: int = 16,
+                fuel_limit: int = 1_000_000_000,
+            ) -> str:
+                """Execute untrusted WebAssembly code in a strict sandbox.
+
+                The sandbox enforces:
+                - No filesystem access (all disk I/O blocked)
+                - No network access
+                - Memory hard limit (default 16 MB)
+                - CPU instruction hard limit (default 1B instructions)
+                - Sensitive path scanning pre-flight
+
+                Args:
+                    wasm_base64: Base64-encoded WebAssembly binary (.wasm).
+                    entrypoint: Name of the exported function to call (default: 'main').
+                    args: List of integer arguments to pass to the entrypoint.
+                    memory_limit_mb: Memory limit in MB (default: 16).
+                    fuel_limit: CPU instruction budget (default: 1_000_000_000).
+
+                Returns:
+                    JSON with execution result or error details.
+                """
+                import base64
+                from sandbox.wasm_executor import WasmSandbox, SandboxConfig
+
+                try:
+                    wasm_bytes = base64.b64decode(wasm_base64)
+                except Exception as exc:
+                    return json.dumps({
+                        "error": True,
+                        "message": f"Base64 decode failed: {exc}",
+                    }, indent=2)
+
+                try:
+                    sandbox = WasmSandbox(SandboxConfig(
+                        memory_limit_bytes=memory_limit_mb * 1024 * 1024,
+                        fuel_limit=fuel_limit,
+                    ))
+                    result = sandbox.execute_untrusted_code(wasm_bytes, entrypoint, args)
+                    return json.dumps({
+                        "error": False,
+                        "return_values": [str(v) for v in result.return_values],
+                        "fuel_consumed": result.fuel_consumed,
+                        "execution_time_ms": result.execution_time_ms,
+                        "trapped": result.trapped,
+                        "trap_reason": result.trap_reason,
+                    }, indent=2)
+                except Exception as exc:
+                    return json.dumps({
+                        "error": True,
+                        "message": str(exc),
+                    }, indent=2)
 
         for domain in self._config.ontology.domains:
             domain_name = domain.name
@@ -204,9 +284,24 @@ class GovernanceGateway:
             )
 
     def run(self) -> None:
-        """Start the MCP server (stdio transport)."""
-        logger.info("Starting MCP Governance Gateway on stdio...")
-        self._mcp.run(transport="stdio")
+        """Start the MCP server.
+
+        Uses stdio transport by default for CLI mode (interactive).
+        When the config specifies 'streamable-http' or 'sse', uses that instead.
+        """
+        transport = self._config.mcp.transport if hasattr(self._config.mcp, 'transport') else "stdio"
+        logger.info(
+            "Starting MCP Governance Gateway '%s' (transport=%s)",
+            self._config.mcp.server_name,
+            transport,
+        )
+        try:
+            self._mcp.run(transport=transport)
+        except (KeyboardInterrupt, SystemExit):
+            logger.info("MCP server stopped via interrupt")
+        except Exception:
+            logger.exception("MCP server stopped with error")
+            raise
 
     def close(self) -> None:
         """Shut down the MCP server."""

@@ -107,7 +107,6 @@ class TestStartMCPCommand:
 
     # ── Pure mock-based happy path (no real deps) ──
 
-    @patch("agentos_cli.cli.asyncio")
     @patch("governance.mcp_server.GovernanceGateway")
     @patch("governance.write_gate.WriteGate")
     @patch("governance.schema_provider.SchemaProvider")
@@ -118,7 +117,6 @@ class TestStartMCPCommand:
         mock_schema_provider_cls,
         mock_write_gate_cls,
         mock_gateway_cls,
-        mock_asyncio,
         runner: CliRunner,
     ):
         """Should bootstrap and start the MCP gateway successfully.
@@ -131,6 +129,7 @@ class TestStartMCPCommand:
         mock_config.mcp.host = "0.0.0.0"
         mock_config.mcp.port = 8100
         mock_config.mcp.server_name = "test-gateway"
+        mock_config.mcp.transport = "stdio"
         mock_config.mcp.validation.nonce_secret = "test-secret"
         mock_config.mcp.validation.nonce_ttl_seconds = 300
         mock_config.ontology.owl_dir = "/fake/owl"
@@ -140,12 +139,10 @@ class TestStartMCPCommand:
         mock_config_loader.load.return_value = mock_config
         mock_config_loader_cls.return_value = mock_config_loader
 
-        # Mock GovernanceGateway instance
+        # Mock GovernanceGateway instance: simulate Ctrl+C after run starts
         mock_gateway = MagicMock()
+        mock_gateway.run.side_effect = KeyboardInterrupt()
         mock_gateway_cls.return_value = mock_gateway
-
-        # Simulate graceful Ctrl+C shutdown
-        mock_asyncio.run.side_effect = KeyboardInterrupt()
 
         with runner.isolated_filesystem():
             result = runner.invoke(main, ["start-mcp", "--port", "8100"])
@@ -169,7 +166,7 @@ class TestStartMCPCommand:
             write_gate=mock_write_gate_cls.return_value,
             config=mock_config,
         )
-        mock_asyncio.run.assert_called_once_with(mock_gateway.run())
+        mock_gateway.run.assert_called_once()
 
 
 # ── Tests: agentos loop run ──

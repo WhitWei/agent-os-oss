@@ -71,7 +71,6 @@ CAPABILITIES = [
 # 已知孤儿的豁免登记表。每一条都必须写明理由 —— 不允许静默豁免。
 # 豁免不等于"没问题"，只是把"要不要接线"这个决定显式移交给人工评审。
 ALLOWLIST: dict[str, str] = {
-    "WasmSandbox": "WasmSandbox 目前作为 L1.5 预置底层计算沙箱，在未来引入执行外部第三方不受信插件/工具代码的逻辑时会被正式装配调用。",
     "AutonomyPolicy.check_path_access": "文件系统白名单检测 check_path_access 目前作为声明式安全保护能力，后续将在接入文件读写等工具执行器时进行物理挂载。",
 }
 
