@@ -233,11 +233,15 @@ class AgentOSKernel:
         For the MVP, this is a simple intent parser. In production,
         this would use an LLM to parse the user's intent and map it
         to governance gate operations.
-        """
-        text = message.text.strip()
 
-        # Simple intent detection for MVP demo
-        text_lower = text.lower()
+        Note: We use message.text (not stripped) for execute_governed_write
+        data extraction because the RDF payload must be byte-identical to
+        what was used during nonce generation.  strip() would drop trailing
+        whitespace, causing a hash mismatch in WriteGate._verify_nonce.
+        """
+        raw_text = message.text
+        text_stripped = raw_text.strip()
+        text_lower = text_stripped.lower()
 
         if "schema" in text_lower and "it-asset" in text_lower:
             if self._write_gate:
@@ -251,9 +255,10 @@ class AgentOSKernel:
                 "with your RDF data in Turtle format."
             )
 
-        if text.startswith("execute_governed_write "):
+        if text_stripped.startswith("execute_governed_write "):
             # Format: execute_governed_write <domain> <nonce>\n<data>
-            lines = text.split("\n", 1)
+            # Use raw_text to preserve RDF data integrity for nonce hash verification.
+            lines = raw_text.split("\n", 1)
             parts = lines[0].split()
             if len(parts) >= 3:
                 domain = parts[1]

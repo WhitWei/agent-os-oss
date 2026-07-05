@@ -42,29 +42,84 @@ class Capability:
 # 目前纳入检测的能力清单。新增一个安全/治理组件时，应同步在这里补一条 —— 这也是
 # Rule 10.4 落地的方式：新组件从第一天起就被纳入接线检测，而不是靠事后审计发现。
 CAPABILITIES = [
-    Capability("SemanticFirewall", r"\bSemanticFirewall\s*\(", "src/security/firewall.py"),
-    Capability("CircuitBreaker", r"\bCircuitBreaker\s*\(", "src/security/circuit_breaker.py"),
-    Capability("BillingFuse", r"\bBillingFuse\s*\(", "src/security/billing_fuse.py"),
-    Capability("WasmSandbox", r"\bWasmSandbox\s*\(", "src/sandbox/wasm_executor.py"),
+    Capability("SemanticFirewall", r"\bSemanticFirewall\s*\(", "src/agentos/security/firewall.py"),
+    Capability("CircuitBreaker", r"\bCircuitBreaker\s*\(", "src/agentos/security/circuit_breaker.py"),
+    Capability("BillingFuse", r"\bBillingFuse\s*\(", "src/agentos/security/billing_fuse.py"),
+    Capability("WasmSandbox", r"\bWasmSandbox\s*\(", "src/agentos/sandbox/wasm_executor.py"),
     Capability(
         "AutonomyPolicy.check_path_access",
         r"\.check_path_access\s*\(",
-        "src/policies/autonomy_policy.py",
+        "src/agentos/policies/autonomy_policy.py",
     ),
     Capability(
         "AutonomyPolicy.check_write_quota",
         r"\.check_write_quota\s*\(",
-        "src/policies/autonomy_policy.py",
+        "src/agentos/policies/autonomy_policy.py",
     ),
     Capability(
         "AutonomyPolicy.check_command",
         r"\.check_command\s*\(",
-        "src/policies/autonomy_policy.py",
+        "src/agentos/policies/autonomy_policy.py",
     ),
     Capability(
         "AutonomyPolicy.check_session_alive",
         r"\.check_session_alive\s*\(",
-        "src/policies/autonomy_policy.py",
+        "src/agentos/policies/autonomy_policy.py",
+    ),
+    # ── Governance / Write pipeline ──
+    Capability(
+        "WriteGate",
+        r"\bWriteGate\s*\(",
+        "src/agentos/governance/write_gate.py",
+    ),
+    Capability(
+        "SchemaProvider",
+        r"\bSchemaProvider\s*\(",
+        "src/agentos/governance/schema_provider.py",
+    ),
+    Capability(
+        "SHACLValidator",
+        r"\bSHACLValidator\b",
+        "src/agentos/governance/shacl_validator.py",
+    ),
+    Capability(
+        "Neo4jClient",
+        r"\bNeo4jClient\s*\(",
+        "src/agentos/governance/neo4j_client.py",
+    ),
+    # ── Workflow / SOP engine ──
+    Capability(
+        "SOPEngine",
+        r"\bSOPEngine\s*\(",
+        "src/agentos/workflow/sop_engine.py",
+    ),
+    Capability(
+        "SOPEngine.resume",
+        r"\.resume\s*\(",
+        "src/agentos/workflow/sop_engine.py",
+    ),
+    # ── Channel adapters ──
+    Capability(
+        "FeishuAdapter",
+        r"\bFeishuAdapter\s*\(",
+        "src/agentos/adapters/feishu_adapter.py",
+    ),
+    # ── Persistence stores ──
+    Capability(
+        "FeedbackDB",
+        r"\bFeedbackDB\s*\(",
+        "src/agentos/database/feedback_db.py",
+    ),
+    Capability(
+        "WorkflowStateStore",
+        r"\bWorkflowStateStore\s*\(",
+        "src/agentos/database/state_store.py",
+    ),
+    # ── Policy loader ──
+    Capability(
+        "load_policy",
+        r"\bload_policy\s*\(",
+        "src/agentos/policies/autonomy_policy.py",
     ),
 ]
 
