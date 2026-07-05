@@ -75,7 +75,7 @@ session:
 
 @click.group()
 @click.option("-v", "--verbose", count=True, help="Increase verbosity.")
-@click.version_option(version="0.1.0", prog_name="agentos")
+@click.version_option(version="0.1.1", prog_name="agentos")
 def main(verbose: int) -> None:
     """agentos — Agent OS governance runtime CLI."""
     log_level = logging.DEBUG if verbose > 0 else logging.WARNING

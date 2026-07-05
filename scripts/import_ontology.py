@@ -7,17 +7,25 @@ Usage:
 
 from __future__ import annotations
 
+import os
 import argparse
 import asyncio
 import logging
 import sys
 from pathlib import Path
 
+# Provide mock environment variables if not set, preventing ConfigError
+os.environ.setdefault("FEISHU_APP_ID", "cli_app_id")
+os.environ.setdefault("FEISHU_APP_SECRET", "cli_app_secret")
+os.environ.setdefault("FEISHU_VERIFICATION_TOKEN", "cli_verif_token")
+os.environ.setdefault("FEISHU_ENCRYPT_KEY", "cli_encrypt_key")
+os.environ.setdefault("MCP_NONCE_SECRET", "test-secret")
+
 # Ensure src is on the path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from agentos_kernel.config import ConfigLoader
-from governance.neo4j_client import Neo4jClient
+from agentos.kernel.config import ConfigLoader
+from agentos.governance.neo4j_client import Neo4jClient
 
 logging.basicConfig(
     level=logging.INFO,

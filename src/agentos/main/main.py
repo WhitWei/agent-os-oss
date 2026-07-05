@@ -258,7 +258,7 @@ def create_app(bootstrap: ServiceBootstrap | None = None) -> FastAPI:
 
     app = FastAPI(
         title="Agent OS Unified Service",
-        version="0.1.0",
+        version="0.1.1",
         description="Agent governance runtime — Feishu webhook, SOP orchestration, security guardrails",
         lifespan=_lifespan,
     )
@@ -289,7 +289,7 @@ def create_app(bootstrap: ServiceBootstrap | None = None) -> FastAPI:
         }
         if b.kernel is None:
             status = "degraded"
-        return {"status": status, "service": "agent-os", "version": "0.1.0", **details}
+        return {"status": status, "service": "agent-os", "version": "0.1.1", **details}
 
     # ── Feishu Webhook ──
 

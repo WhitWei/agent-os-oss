@@ -14,33 +14,41 @@ Usage:
 
 from __future__ import annotations
 
+import os
 import asyncio
 import logging
 import sys
 from pathlib import Path
 
+# Provide mock environment variables if not set, preventing ConfigError
+os.environ.setdefault("FEISHU_APP_ID", "cli_app_id")
+os.environ.setdefault("FEISHU_APP_SECRET", "cli_app_secret")
+os.environ.setdefault("FEISHU_VERIFICATION_TOKEN", "cli_verif_token")
+os.environ.setdefault("FEISHU_ENCRYPT_KEY", "cli_encrypt_key")
+os.environ.setdefault("MCP_NONCE_SECRET", "test-secret")
+
 # Ensure src is on the path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from agentos_kernel.config import ConfigLoader
-from agentos_kernel.kernel import ChannelMessage, AgentOSKernel
-from adapters.cli_adapter import CLIAdapter
-from policies.autonomy_policy import load_policy
-from governance.neo4j_client import Neo4jClient
-from governance.schema_provider import SchemaProvider
-from governance.write_gate import WriteGate
-from observability.telemetry import (
+from agentos.kernel.config import ConfigLoader
+from agentos.kernel.kernel import ChannelMessage, AgentOSKernel
+from agentos.adapters.cli_adapter import CLIAdapter
+from agentos.policies.autonomy_policy import load_policy
+from agentos.governance.neo4j_client import Neo4jClient
+from agentos.governance.schema_provider import SchemaProvider
+from agentos.governance.write_gate import WriteGate
+from agentos.observability.telemetry import (
     init_telemetry,
     get_tracer,
     shutdown_telemetry,
     TelemetryConfig,
 )
-from observability.langfuse_integration import init_langfuse, LangfuseConfig
-from sandbox.wasm_executor import WasmSandbox
-from security.firewall import SemanticFirewall
-from security.circuit_breaker import CircuitBreaker, CircuitBreakerConfig
-from security.billing_fuse import BillingFuse, BillingFuseConfig, TokenUsage
-from agentos_kernel.exceptions import SandboxError, SecurityInterceptError, BillingFuseTrippedError
+from agentos.observability.langfuse_integration import init_langfuse, LangfuseConfig
+from agentos.sandbox.wasm_executor import WasmSandbox
+from agentos.security.firewall import SemanticFirewall
+from agentos.security.circuit_breaker import CircuitBreaker, CircuitBreakerConfig
+from agentos.security.billing_fuse import BillingFuse, BillingFuseConfig, TokenUsage
+from agentos.kernel.exceptions import SandboxError, SecurityInterceptError, BillingFuseTrippedError
 
 logging.basicConfig(
     level=logging.INFO,

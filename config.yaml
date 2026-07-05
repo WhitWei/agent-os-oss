@@ -6,7 +6,7 @@
 # ── ZeroClaw Kernel ──────────────────────────────────────
 kernel:
   name: "ZeroClaw"
-  version: "0.1.0"
+  version: "0.1.1"
   log_level: "INFO"
   session_ttl_seconds: 300
 

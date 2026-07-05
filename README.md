@@ -4,7 +4,7 @@
   <a href="https://github.com/WhitWei/agent-os-oss/actions"><img src="https://img.shields.io/github/actions/workflow/status/WhitWei/agent-os-oss/integration-ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg?style=flat-square" alt="Python Versions"></a>
-  <a href="https://github.com/WhitWei/agent-os-oss/releases"><img src="https://img.shields.io/badge/status-alpha%20v0.1.0-orange.svg?style=flat-square" alt="Alpha Status"></a>
+  <a href="https://github.com/WhitWei/agent-os-oss/releases"><img src="https://img.shields.io/badge/status-alpha%20v0.1.1-orange.svg?style=flat-square" alt="Alpha Status"></a>
   <a href="docs/handbook.md"><img src="https://img.shields.io/badge/docs-handbook-orange.svg?style=flat-square" alt="Handbook"></a>
 </p>
 
