@@ -246,7 +246,8 @@ class CircuitBreaker:
                 continue
             # Hash the individual key:value pair into a vector position
             feature_str = f"{key}={val}"
-            seed = abs(hash(feature_str)) % (2**31)
+            hash_digest = hashlib.sha256(feature_str.encode("utf-8")).hexdigest()
+            seed = int(hash_digest[:8], 16)
             rng = np.random.RandomState(seed)
             # Each feature activates 3 slots (reduce collisions)
             for _ in range(3):
@@ -257,7 +258,8 @@ class CircuitBreaker:
         # Also add the key names alone (structural similarity: same keys
         # with different values still partially match)
         for key in sorted(params.keys()):
-            key_seed = abs(hash(key)) % (2**31)
+            hash_digest = hashlib.sha256(key.encode("utf-8")).hexdigest()
+            key_seed = int(hash_digest[:8], 16)
             krng = np.random.RandomState(key_seed)
             idx = krng.randint(0, self.config.max_vector_size)
             vec[idx] += 0.5

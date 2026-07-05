@@ -129,7 +129,7 @@ class TestStage3WriteExecution:
         🚨 RED LINE: A crafted/hand-made nonce should be rejected.
         """
         # Craft a fake nonce with correct format but random signature
-        fake_nonce = f"{int(time.time())}:{hashlib.sha256(sample_valid_ttl.encode()).hexdigest()}:fakesignature"
+        fake_nonce = f"{int(time.monotonic())}:{hashlib.sha256(sample_valid_ttl.encode()).hexdigest()}:fakesignature"
 
         with pytest.raises(WriteGateError) as exc:
             await write_gate.execute_governed_write(
@@ -146,7 +146,7 @@ class TestStage3WriteExecution:
         🚨 RED LINE: An expired nonce (past TTL) must be rejected.
         """
         # Create a nonce with a timestamp in the past
-        old_timestamp = int(time.time()) - 600  # 10 minutes ago (TTL is 300s)
+        old_timestamp = int(time.monotonic()) - 600  # 10 minutes ago (TTL is 300s)
         data_hash = hashlib.sha256(sample_valid_ttl.encode()).hexdigest()
         payload = f"{old_timestamp}:{data_hash}:it-asset-mgmt"
         signature = hmac.new(

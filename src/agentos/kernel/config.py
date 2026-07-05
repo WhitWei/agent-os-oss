@@ -127,15 +127,17 @@ def _resolve_env_vars(value: str) -> str:
                 if default.startswith("-"):
                     return default[1:]
                 return default
-            # Var not found, no default: return empty string
-            return ""
+            # Var not found, no default
+            from agentos.kernel.exceptions import ConfigError
+            raise ConfigError(f"Missing required environment variable: {var_name}")
         # Plain ${VAR} without default
         if match.group(3) is not None:
             var_name = match.group(3)
             env_val = os.environ.get(var_name)
             if env_val is not None:
                 return env_val
-            return match.group(0)  # Keep unresolved if no env var
+            from agentos.kernel.exceptions import ConfigError
+            raise ConfigError(f"Missing required environment variable: {var_name}")
         return match.group(0)
 
     return _ENV_VAR_RE.sub(_replace, value)

@@ -87,21 +87,29 @@ def init_db(conn: sqlite3.Connection) -> None:
     logger.info("agent_feedback 表已初始化（idempotent）")
 
 
-class FeedbackDB:
-    """agent_feedback SQLite 表的读写封装。
+import threading
 
-    使用 check_same_thread=False 以支持异步上下文（调用方需保证互斥）。
-    """
+class FeedbackDB:
+    """agent_feedback SQLite 表的读写封装。"""
 
     def __init__(self, db_path: str = "agentos_feedback.db") -> None:
         # NOTE: 若目录不存在则自动创建，确保 CI 环境兼容
         Path(db_path).parent.mkdir(parents=True, exist_ok=True)
-        self._db_path = db_path
-        self.conn = sqlite3.connect(db_path, check_same_thread=False)
-        # 保持 WAL 模式提升并发读性能（写仍串行）
-        self.conn.execute("PRAGMA journal_mode=WAL;")
+        self.db_path = db_path
+        self._local = threading.local()
+        self._init_db()
+        logger.info("FeedbackDB initialized: %s", db_path)
+
+    @property
+    def conn(self) -> sqlite3.Connection:
+        if not hasattr(self._local, "conn"):
+            conn = sqlite3.connect(self.db_path, check_same_thread=False)
+            conn.execute("PRAGMA journal_mode=WAL;")
+            self._local.conn = conn
+        return self._local.conn
+
+    def _init_db(self):
         init_db(self.conn)
-        logger.info("FeedbackDB 已连接: %s", db_path)
 
     def insert_feedback(
         self,

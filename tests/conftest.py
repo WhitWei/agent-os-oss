@@ -14,6 +14,13 @@ logger = logging.getLogger(__name__)
 # ── Project paths ──
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+# ── Mock Env Vars for ConfigLoader ──
+import os
+os.environ.setdefault("FEISHU_APP_ID", "cli_app_id")
+os.environ.setdefault("FEISHU_APP_SECRET", "cli_app_secret")
+os.environ.setdefault("FEISHU_VERIFICATION_TOKEN", "cli_verif_token")
+os.environ.setdefault("FEISHU_ENCRYPT_KEY", "cli_encrypt_key")
+os.environ.setdefault("MCP_NONCE_SECRET", "test-secret")
 
 @pytest.fixture(scope="session")
 def project_root() -> Path:

@@ -164,6 +164,9 @@ class WasmSandbox:
             raise SandboxError("WASM engine not initialised")
 
         # ── Pre-flight sensitive-path scan on raw bytes ──
+        # NOTE: This is only a "best effort pre-flight check", not a hardware-level trap.
+        # Decoding binary to utf-8 produces random replacement characters, making this
+        # string search probabilistic. True protection relies on wasmtime's memory bounds below.
         try:
             decoded = wasm_module.decode("utf-8", errors="replace")
         except Exception:

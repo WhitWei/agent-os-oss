@@ -245,7 +245,7 @@ class WriteGate:
             "status": "success",
             "domain": domain_name,
             "transaction_id": hashlib.sha256(
-                f"{domain_name}:{time.time()}".encode()
+                f"{domain_name}:{time.monotonic()}".encode()
             ).hexdigest()[:16],
         }
 
@@ -259,7 +259,7 @@ class WriteGate:
         - data_hash: SHA256 of the data_rdf
         - signature: HMAC-SHA256 of "{timestamp}:{data_hash}:{domain}"
         """
-        timestamp = int(time.time())
+        timestamp = int(time.monotonic())
         data_hash = hashlib.sha256(data_rdf.encode("utf-8")).hexdigest()
         payload = f"{timestamp}:{data_hash}:{domain_name}"
         signature = hmac.new(
@@ -288,7 +288,7 @@ class WriteGate:
             timestamp = int(timestamp_str)
 
             # Check TTL
-            if time.time() - timestamp > self._nonce_ttl:
+            if time.monotonic() - timestamp > self._nonce_ttl:
                 raise WriteGateError(
                     f"Validation nonce has expired (TTL={self._nonce_ttl}s). "
                     f"Please re-validate via verify_shacl_compliance."
@@ -327,7 +327,7 @@ class WriteGate:
                     "Please re-validate the correct data via verify_shacl_compliance."
                 )
 
-            logger.debug("Validation nonce verified (age=%ds)", int(time.time()) - timestamp)
+            logger.debug("Validation nonce verified (age=%ds)", int(time.monotonic()) - timestamp)
 
         except WriteGateError:
             raise
@@ -343,7 +343,7 @@ class WriteGate:
             parts = nonce.split(":")
             if len(parts) == 3:
                 signature = parts[2]
-                self._consumed_nonces[signature] = time.time() + self._nonce_ttl
+                self._consumed_nonces[signature] = time.monotonic() + self._nonce_ttl
                 logger.debug("Nonce consumed (expires from tracking at +%ds)", self._nonce_ttl)
         except Exception:
             logger.exception("Failed to consume validation nonce")
@@ -351,7 +351,7 @@ class WriteGate:
 
     def _cleanup_expired_nonces(self) -> None:
         """Remove expired nonces from the consumed set to bound memory."""
-        now = time.time()
+        now = time.monotonic()
         expired = [
             sig for sig, expires_at in self._consumed_nonces.items()
             if expires_at <= now

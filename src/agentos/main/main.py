@@ -266,7 +266,7 @@ def create_app(bootstrap: ServiceBootstrap | None = None) -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_credentials=True,
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
     )
@@ -370,13 +370,7 @@ def create_app(bootstrap: ServiceBootstrap | None = None) -> FastAPI:
         if ctx is None:
             raise HTTPException(status_code=404, detail=f"SOP run {run_id} not found")
 
-        sop_def = None
-        for s in b.available_sops:
-            if s["sop_id"] == ctx.sop_id:
-                from agentos.workflow.sop_engine import SOPEngine
-                sop_def = SOPEngine.load_sop(s["file"])
-                break
-
+        sop_def = _load_sop_definition(b, ctx.sop_id)
         if sop_def is None:
             raise HTTPException(status_code=404, detail=f"SOP definition {ctx.sop_id} not found")
 
@@ -398,6 +392,15 @@ def create_app(bootstrap: ServiceBootstrap | None = None) -> FastAPI:
     return app
 
 
+def _load_sop_definition(b: ServiceBootstrap, sop_id: str):
+    """Load SOP definition by ID."""
+    for s in b.available_sops:
+        if s["sop_id"] == sop_id:
+            from agentos.workflow.sop_engine import SOPEngine
+            return SOPEngine.load_sop(s["file"])
+    return None
+
+
 async def _handle_card_callback(body: dict[str, Any], b: ServiceBootstrap) -> dict[str, Any]:
     """Resolve an interactive card callback to SOPEngine.resume()."""
     callback = b.feishu.parse_card_callback(body)
@@ -415,13 +418,7 @@ async def _handle_card_callback(body: dict[str, Any], b: ServiceBootstrap) -> di
             "reason": f"SOP run {run_id} not found (may have expired)",
         }
 
-    sop_def = None
-    for s in b.available_sops:
-        if s["sop_id"] == ctx.sop_id:
-            from agentos.workflow.sop_engine import SOPEngine
-            sop_def = SOPEngine.load_sop(s["file"])
-            break
-
+    sop_def = _load_sop_definition(b, ctx.sop_id)
     if sop_def is None:
         return {"status": "error", "reason": f"SOP definition {ctx.sop_id} not found"}
 
