@@ -46,7 +46,7 @@ mcp:
 
 # ── Autonomy Policy ──────────────────────────────────────
 autonomy:
-  policy_file: "src/policies/policy_config.yaml"
+  policy_file: "src/agentos/policies/policy_config.yaml"
 
 # ── Ontology ─────────────────────────────────────────────
 ontology:
