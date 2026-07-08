@@ -109,7 +109,7 @@ class TestServiceBootstrap:
         config_content = """
 kernel:
   name: "ZeroClaw"
-  version: "0.1.1"
+  version: "0.1.2"
 adapters:
   feishu:
     enabled: false

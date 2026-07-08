@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.2] - 2026-07-08
+
+This release introduces the "Out-of-the-Box" Web UI Dashboard, completing Sprint 2. Agent OS now features a built-in visual console powered by Next.js and FastAPI, served as a monolithic binary.
+
+### Added
+- **Web UI Dashboard**: A standalone, zero-configuration React (Next.js + shadcn/ui) dashboard served statically through the backend.
+- **FastAPI Single-Binary Delivery**: Bundled static files in `/dashboard` utilizing SPA fallback routing.
+- **Local Persistence APIs**: Added REST endpoints for Dashboard consumption:
+  - `GET /api/v1/metrics/overview`: Aggregated statistics on spends, intercepts, and active workflow runs.
+  - `GET /api/v1/workflows/runs`: Trace tables powered by `StateStore`.
+  - `GET /api/v1/governance/audits`: Intervention history powered by `FeedbackDB`.
+- **E2E Traceability**: Verified physical logging mapping from internal `CircuitBreaker` and `SemanticFirewall` straight to UI audit tables.
+
+### Fixed
+- **Float Error**: Fixed a critical `TypeError: 'float' object is not callable` in `metrics.py` during L3 UAT testing.
+
+---
+
 ## [0.1.1] - 2026-07-05
 
 This release focuses on solidifying the backend, fixing bugs discovered during the physical integration testing (L2), and refining the namespace structure.

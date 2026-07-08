@@ -81,3 +81,21 @@ class WorkflowStateStore:
         except Exception as exc:
             logger.error("[StateStore] Failed to deserialize context for run_id=%s: %s", run_id, exc)
             return None
+
+    def count_by_state(self, state: str) -> int:
+        """Count workflow runs by state."""
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM sop_state WHERE state = ?", (state,))
+        row = cursor.fetchone()
+        return row[0] if row else 0
+
+    def list_runs(self, limit: int = 50, offset: int = 0) -> list[dict]:
+        """List workflow runs with pagination."""
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT run_id, sop_id, state, updated_at FROM sop_state ORDER BY updated_at DESC LIMIT ? OFFSET ?",
+            (limit, offset)
+        )
+        return [dict(row) for row in cursor.fetchall()]

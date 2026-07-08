@@ -186,6 +186,12 @@ class FeedbackDB:
             for row in rows
         ]
 
+    def count_by_decision(self, decision: str) -> int:
+        """Count feedback records by decision (e.g. REJECTED or APPROVED)."""
+        cursor = self.conn.execute("SELECT COUNT(*) FROM agent_feedback WHERE decision = ?", (decision,))
+        row = cursor.fetchone()
+        return row[0] if row else 0
+
     def close(self) -> None:
         """关闭数据库连接。"""
         self.conn.close()

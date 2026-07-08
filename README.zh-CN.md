@@ -4,7 +4,7 @@
   <a href="https://github.com/WhitWei/agent-os-oss/actions"><img src="https://img.shields.io/github/actions/workflow/status/WhitWei/agent-os-oss/integration-ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg?style=flat-square" alt="Python Versions"></a>
-  <a href="https://github.com/WhitWei/agent-os-oss/releases"><img src="https://img.shields.io/badge/status-alpha%20v0.1.1-orange.svg?style=flat-square" alt="Alpha Status"></a>
+  <a href="https://github.com/WhitWei/agent-os-oss/releases"><img src="https://img.shields.io/badge/status-alpha%20v0.1.2-orange.svg?style=flat-square" alt="Alpha Status"></a>
 </p>
 
 <p align="center">
@@ -240,10 +240,11 @@ steps:
 
 **状态持久化** —— 每一步写入 SQLite（WAL 模式），服务重启后精确恢复，不会丢失上下文。
 
-### 📊 第五层：可观测性（OTel + Langfuse）
+### 📊 第五层：可观测性与治理看板（Web UI & OTel）
 
 | 组件 | 提供什么 |
 |------|---------|
+| **内建 Web UI 看板** | 一键启动的开箱即用可视化大屏（`localhost:8000/dashboard`），实时呈现拦截统计、SOP 流程追溯、资金消耗。纯静态导出，FastAPI 单体挂载，零额外依赖！ |
 | **OpenTelemetry** | OTLP gRPC 导出器、BatchSpanProcessor、TraceIdRatioBased 采样——可路由到任何 OTLP 后端 |
 | **Langfuse SDK** | 评分追踪、数据集管理、Prompt 管理、batch/flush 防内存堆积 |
 | **安全遥测** | 专用的 `emit_security_intercept_span` 和 `emit_shacl_validation_error_span`——安全事件有独立观测管道 |
@@ -350,7 +351,7 @@ steps:
 - [ ] **向量嵌入层** —— 在结构化本体之外补全文本检索 RAG
 - [ ] **Prometheus `/metrics` 端点** —— 原生对接 Grafana 看板
 - [ ] **Docker Compose 一键启动** —— 预配置 Neo4j + AOS + OTel 收集器
-- [ ] **Web UI 看板** —— 实时查看防火墙流量、写门活动、预算消耗
+- [x] **Web UI 看板** —— 实时查看防火墙流量、写门活动、预算消耗
 - [ ] **用户偏好学习** —— 扩展 Neo4j Schema 支持跨会话用户记忆
 
 ---

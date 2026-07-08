@@ -58,7 +58,7 @@ class TelemetryConfig:
     """Configuration for OpenTelemetry tracing."""
 
     service_name: str = "agent-os-poc"
-    service_version: str = "0.1.1"
+    service_version: str = "0.1.2"
     otlp_endpoint: str = "http://localhost:4317"
     enabled: bool = True
     sample_rate: float = 1.0  # 0.0 → drop all, 1.0 → sample all

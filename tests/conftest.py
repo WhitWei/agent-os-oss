@@ -42,7 +42,7 @@ def test_config_yaml(tmp_path: Path) -> Path:
     import yaml
 
     config = {
-        "kernel": {"name": "TestAgentOS", "version": "0.1.1", "log_level": "DEBUG"},
+        "kernel": {"name": "TestAgentOS", "version": "0.1.2", "log_level": "DEBUG"},
         "adapters": {
             "feishu": {"enabled": False},
             "cli": {"enabled": True},

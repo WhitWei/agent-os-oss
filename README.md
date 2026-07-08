@@ -4,7 +4,7 @@
   <a href="https://github.com/WhitWei/agent-os-oss/actions"><img src="https://img.shields.io/github/actions/workflow/status/WhitWei/agent-os-oss/integration-ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg?style=flat-square" alt="Python Versions"></a>
-  <a href="https://github.com/WhitWei/agent-os-oss/releases"><img src="https://img.shields.io/badge/status-alpha%20v0.1.1-orange.svg?style=flat-square" alt="Alpha Status"></a>
+  <a href="https://github.com/WhitWei/agent-os-oss/releases"><img src="https://img.shields.io/badge/status-alpha%20v0.1.2-orange.svg?style=flat-square" alt="Alpha Status"></a>
 </p>
 
 <p align="center">
@@ -241,15 +241,16 @@ steps:
 
 **State persistence** — every step state is saved to SQLite (WAL mode), surviving service restarts. Resume from exactly where the workflow was suspended.
 
-### 📊 Layer 5: Observability (OTel + Langfuse)
+### 📊 Fifth Layer: Observability and Governance Dashboard (Web UI & OTel)
 
-| Component | What it gives you |
+| Component | What it provides |
 |-----------|------------------|
-| **OpenTelemetry** | OTLP gRPC exporter, BatchSpanProcessor, TraceIdRatioBased sampling — route to any OTLP-compatible backend |
-| **Langfuse SDK** | Score tracking, dataset management, prompt management, batch/flush config for memory safety |
-| **Security telemetry** | Dedicated `emit_security_intercept_span` and `emit_shacl_validation_error_span` — security events get their own observable pipeline |
-| **FeedbackDB** | SQLite-backed audit trail: every HITL decision recorded with trace_id, reviewer, decision, reason, original agent output |
-| **No-op fallback** | Unconfigured telemetry silently drops all spans — no code changes needed between dev and prod |
+| **Built-in Web UI Dashboard** | An out-of-the-box, zero-configuration visual console (`localhost:8000/dashboard`). Real-time metrics on intercepts, SOP traces, and token spend. Built with Next.js static export and served as a single FastAPI binary! |
+| **OpenTelemetry** | OTLP gRPC exporter, BatchSpanProcessor, TraceIdRatioBased sampling — route traces to any OTLP backend |
+| **Langfuse SDK** | Score tracking, dataset management, prompt management, and batch/flush to prevent memory bloat |
+| **Security Telemetry** | Dedicated `emit_security_intercept_span` and `emit_shacl_validation_error_span` — distinct observability pipelines for security events |
+| **Feedback Database** | SQLite audit trails: A complete record of trace_id, reviewer, decision, reason, and original agent output for every human approval |
+| **No-op Fallback** | Silently drops spans when telemetry is unconfigured — no code changes needed between dev and prod |
 
 ---
 
@@ -351,7 +352,7 @@ Every change passes three test tiers to prevent "phantom merges":
 - [ ] **Vector embedding layer** — text retrieval alongside structured ontology
 - [ ] **Prometheus `/metrics` endpoint** — native Grafana dashboards
 - [ ] **Docker Compose** — one-line startup with Neo4j + AOS + OTel collector
-- [ ] **Web UI dashboard** — real-time firewall traffic, write gate activity, budget
+- [x] **Web UI dashboard** — real-time firewall traffic, write gate activity, budget
 - [ ] **User preference learning** — extend Neo4j schema for per-user memory
 
 ---

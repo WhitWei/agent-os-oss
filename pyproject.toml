@@ -1,6 +1,6 @@
 [project]
 name = "agent-os-oss"
-version = "0.1.1"
+version = "0.1.2"
 description = "Agent OS MVP — agentos_kernel, MCP governance gateway, Neo4j semantic ontology"
 readme = "README.md"
 requires-python = ">=3.11"

@@ -59,7 +59,7 @@ class TestConfigLoader:
 
         assert isinstance(config, AppConfig)
         assert config.kernel.name == "TestAgentOS"
-        assert config.kernel.version == "0.1.1"
+        assert config.kernel.version == "0.1.2"
         assert config.mcp.server_name == "test-gateway"
         assert len(config.ontology.domains) == 1
         assert config.ontology.domains[0].name == "it-asset-mgmt"

@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field, field_validator
 
 class KernelConfig(BaseModel):
     name: str = "ZeroClaw"
-    version: str = "0.1.1"
+    version: str = "0.1.2"
     log_level: str = "INFO"
     session_ttl_seconds: int = 300
 
